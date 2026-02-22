@@ -79,15 +79,15 @@ A    www.mclient.pro  → 37.48.254.100
 
 ---
 
-## Шаг 7: Создание базы данных PostgreSQL
+## Шаг 7: Создание базы данных MySQL
 
 1. Вернитесь на страницу проекта `MClient CRM`
 2. Нажмите **Create Database**
-3. Выберите **PostgreSQL**
+3. Выберите **MySQL**
 4. Заполните:
-   - **Name**: `mclient-postgres`
+   - **Name**: `mclient-mysql`
    - **Database Name**: `mclient_crm`
-   - **Username**: `postgres`
+   - **Username**: `mclient_user`
    - **Password**: (сгенерируйте надежный пароль)
 5. Нажмите **Create**
 
@@ -114,13 +114,13 @@ APP_LOCALE=ru
 php artisan key:generate --show
 ```
 
-### База данных (используйте данные из созданной PostgreSQL):
+### База данных (используйте данные из созданной MySQL):
 ```bash
-DB_CONNECTION=pgsql
-DB_HOST=mclient-postgres  # имя сервиса PostgreSQL в Dokploy
-DB_PORT=5432
+DB_CONNECTION=mysql
+DB_HOST=mclient-mysql  # имя сервиса MySQL в Dokploy
+DB_PORT=3306
 DB_DATABASE=mclient_crm
-DB_USERNAME=postgres
+DB_USERNAME=mclient_user
 DB_PASSWORD=ваш_пароль_из_шага_7
 ```
 
@@ -238,7 +238,7 @@ docker exec -it CONTAINER_ID php artisan storage:link
 
 ### Если миграции не применились:
 1. Проверьте логи БД
-2. Убедитесь, что DB_CONNECTION=pgsql
+2. Убедитесь, что DB_CONNECTION=mysql
 3. Проверьте credentials базы данных
 
 ---
@@ -278,7 +278,7 @@ docker exec -it CONTAINER_ID php artisan view:clear
 
 ### Резервное копирование БД:
 ```bash
-docker exec POSTGRES_CONTAINER pg_dump -U postgres mclient_crm > backup.sql
+docker exec POSTGRES_CONTAINER mysqldump -u mclient_user -p mclient_crm > backup.sql
 ```
 
 ---

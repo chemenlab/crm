@@ -14,12 +14,12 @@ RUN apk add --no-cache \
     zip \
     unzip \
     icu-dev \
-    postgresql-dev \
+    mysql-client \
     nodejs \
     npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo_pgsql \
+        pdo_mysql \
         gd \
         zip \
         bcmath \
@@ -65,7 +65,7 @@ FROM php:8.3-fpm-alpine
 RUN apk add --no-cache \
     nginx \
     supervisor \
-    postgresql-client \
+    mysql-client \
     libpng \
     libjpeg-turbo \
     freetype \
@@ -75,7 +75,7 @@ RUN apk add --no-cache \
     busybox-suid \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
-        pdo_pgsql \
+        pdo_mysql \
         gd \
         zip \
         bcmath \
