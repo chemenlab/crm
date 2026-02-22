@@ -121,18 +121,29 @@ if [ $TCP_OK -eq 0 ]; then
 fi
 echo "✓ TCP connection OK"
 
-until php artisan db:show 2>/tmp/db_error.log || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+# Check pdo_pgsql extension
+php -r "extension_loaded('pdo_pgsql') ? print('pdo_pgsql: OK'.PHP_EOL) : print('pdo_pgsql: MISSING'.PHP_EOL);"
+
+DB_DSN="pgsql:host=${DB_HOST};port=${DB_PORT:-5432};dbname=${DB_DATABASE}"
+until php -r "
+try {
+    \$pdo = new PDO('${DB_DSN}', '${DB_USERNAME}', '${DB_PASSWORD}');
+    echo 'connected';
+    exit(0);
+} catch (Exception \$e) {
+    fwrite(STDERR, \$e->getMessage() . PHP_EOL);
+    exit(1);
+}" 2>/tmp/db_error.log || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
     RETRY_COUNT=$((RETRY_COUNT + 1))
     echo "Waiting for database... Attempt $RETRY_COUNT/$MAX_RETRIES"
     if [ -s /tmp/db_error.log ]; then
-        echo "  Error: $(head -3 /tmp/db_error.log)"
+        echo "  Error: $(cat /tmp/db_error.log)"
     fi
     sleep 2
 done
 
 if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
     echo "✗ Failed to connect to database after $MAX_RETRIES attempts"
-    [ -s /tmp/db_error.log ] && cat /tmp/db_error.log
     exit 1
 fi
 
