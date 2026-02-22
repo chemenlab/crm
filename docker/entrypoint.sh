@@ -175,25 +175,18 @@ else
 fi
 
 # =============================================================================
-# 4. Run migrations (only on first deploy)
+# 4. Run migrations
 # =============================================================================
-echo "[4/7] Checking database migrations..."
+echo "[4/7] Running database migrations..."
 
-MIGRATION_MARKER="/var/www/storage/.migrations_completed"
+# --isolated prevents concurrent migration runs across multiple replicas
+php artisan migrate --force --no-interaction --isolated
 
-if [ ! -f "$MIGRATION_MARKER" ]; then
-    echo "Running database migrations for the first time..."
-    php artisan migrate --force --no-interaction
-
-    if [ $? -eq 0 ]; then
-        touch "$MIGRATION_MARKER"
-        echo "✓ Migrations completed successfully"
-    else
-        echo "✗ Migration failed"
-        exit 1
-    fi
+if [ $? -eq 0 ]; then
+    echo "✓ Migrations completed"
 else
-    echo "✓ Migrations already applied (marker file exists)"
+    echo "✗ Migration failed"
+    exit 1
 fi
 
 # =============================================================================

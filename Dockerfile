@@ -151,7 +151,7 @@ RUN sed -i 's/user nginx;/user www;/g' /etc/nginx/nginx.conf
 EXPOSE 80
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=180s --retries=5 \
     CMD curl -f http://localhost/up || exit 1
 
 # Set entrypoint
