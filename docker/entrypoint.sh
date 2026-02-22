@@ -98,18 +98,41 @@ echo "✓ .env file generated"
 # 2. Wait for database to be ready
 # =============================================================================
 echo "[2/7] Waiting for database connection..."
+echo "  DB_HOST=${DB_HOST} DB_PORT=${DB_PORT:-5432} DB_DATABASE=${DB_DATABASE} DB_USERNAME=${DB_USERNAME}"
 
 MAX_RETRIES=30
 RETRY_COUNT=0
 
-until php artisan db:show >/dev/null 2>&1 || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+# First check TCP connectivity to avoid waiting 30x on DNS/network issues
+echo "Checking TCP connectivity to ${DB_HOST}:${DB_PORT:-5432}..."
+TCP_OK=0
+for i in $(seq 1 10); do
+    if nc -z -w3 "${DB_HOST}" "${DB_PORT:-5432}" 2>/dev/null; then
+        TCP_OK=1
+        break
+    fi
+    echo "  TCP attempt $i/10..."
+    sleep 2
+done
+
+if [ $TCP_OK -eq 0 ]; then
+    echo "✗ Cannot reach ${DB_HOST}:${DB_PORT:-5432} — network/DNS issue"
+    exit 1
+fi
+echo "✓ TCP connection OK"
+
+until php artisan db:show 2>/tmp/db_error.log || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
     RETRY_COUNT=$((RETRY_COUNT + 1))
     echo "Waiting for database... Attempt $RETRY_COUNT/$MAX_RETRIES"
+    if [ -s /tmp/db_error.log ]; then
+        echo "  Error: $(head -3 /tmp/db_error.log)"
+    fi
     sleep 2
 done
 
 if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
     echo "✗ Failed to connect to database after $MAX_RETRIES attempts"
+    [ -s /tmp/db_error.log ] && cat /tmp/db_error.log
     exit 1
 fi
 
