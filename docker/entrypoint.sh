@@ -323,16 +323,14 @@ php artisan config:clear 2>/dev/null || true
 if [ $MIGRATE_EXIT -eq 0 ]; then
     echo "✓ Migrations completed"
 else
-    echo "✗ Migration failed with exit code $MIGRATE_EXIT"
+    echo "⚠ Migration failed with exit code $MIGRATE_EXIT (continuing startup)"
     echo "--- Migration output ---"
     cat /tmp/migrate_output.log 2>/dev/null || echo "(no output captured)"
     echo "--- Last 50 lines of Laravel log ---"
     tail -n 50 /var/www/storage/logs/laravel.log 2>/dev/null || echo "(no log file)"
-    echo "--- PHP error log ---"
-    find /var/log -name "php*" -type f -exec tail -n 20 {} \; 2>/dev/null || echo "(no php error log)"
-    echo "--- dmesg (last 5 lines, check for OOM/segfault) ---"
-    dmesg 2>/dev/null | tail -n 5 || echo "(dmesg not available)"
-    exit 1
+    echo "⚠ App will start but may have limited functionality until migrations are fixed."
+    # DO NOT exit 1 here! In Dokploy/Swarm, exit 1 causes crash-loop:
+    # container restarts -> migration creates partial tables -> fails again -> repeat
 fi
 
 # =============================================================================
