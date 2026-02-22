@@ -272,26 +272,50 @@ fi
 echo "[4/7] Running database migrations..."
 
 # CRITICAL FIX: Force array driver during migration to prevent chicken-and-egg problem.
-# When CACHE_STORE=database or SESSION_DRIVER=database, Laravel tries to access
-# the 'cache' and 'sessions' tables during boot — but they don't exist yet on
-# a fresh database. This causes an immediate crash (exit code 255).
-# Using 'array' driver keeps everything in-memory during migration.
 echo "  Temporarily setting CACHE_STORE=array, SESSION_DRIVER=array for migration..."
 sed -i 's/^CACHE_STORE=.*/CACHE_STORE=array/' /var/www/.env
 sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' /var/www/.env
+sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' /var/www/.env
 
-# Also clear any cached config to ensure fresh .env values are used
-php artisan config:clear 2>/dev/null || true
+# --- Diagnostics ---
+echo "  [DEBUG] PHP version:"
+php -v 2>&1 | head -1
+echo "  [DEBUG] PHP extensions check:"
+php -m 2>&1 | grep -iE "pdo|mysql|redis|json|mbstring|openssl|tokenizer|xml|ctype|bcmath" | tr '\n' ', '
+echo ""
+echo "  [DEBUG] .env driver values after sed:"
+grep -E '^(CACHE_STORE|SESSION_DRIVER|QUEUE_CONNECTION|DB_)' /var/www/.env
+echo "  [DEBUG] Checking artisan can boot..."
+php artisan --version 2>&1
+ARTISAN_EXIT=$?
+echo "  [DEBUG] artisan --version exit code: $ARTISAN_EXIT"
 
-# Run migration with env overrides as extra safety (belt-and-suspenders)
+if [ $ARTISAN_EXIT -ne 0 ]; then
+    echo "  ✗ artisan failed to boot! Trying with error display..."
+    php -d display_errors=1 -d error_reporting=E_ALL artisan --version 2>&1
+    echo "  [DEBUG] Trying config:clear with full error output..."
+    php -d display_errors=1 -d error_reporting=E_ALL artisan config:clear 2>&1
+fi
+# --- End Diagnostics ---
+
+# Clear any cached config to ensure fresh .env values are used
+echo "  [DEBUG] Running config:clear..."
+php artisan config:clear 2>&1 || echo "  ⚠ config:clear failed (see above)"
+
+# Run migration with env overrides as extra safety
+echo "  [DEBUG] Starting migration..."
 CACHE_STORE=array SESSION_DRIVER=array QUEUE_CONNECTION=sync \
-    php artisan migrate --force --no-interaction -v 2>&1
-MIGRATE_EXIT=$?
+    php -d display_errors=1 -d error_reporting=E_ALL \
+    artisan migrate --force --no-interaction -v 2>&1 | tee /tmp/migrate_output.log
+MIGRATE_EXIT=${PIPESTATUS[0]}
+
+echo "  [DEBUG] Migration exit code: $MIGRATE_EXIT"
 
 # Restore original driver values after migration
 echo "  Restoring drivers: CACHE=$ORIG_CACHE_STORE SESSION=$ORIG_SESSION_DRIVER QUEUE=$ORIG_QUEUE_CONNECTION"
 sed -i "s/^CACHE_STORE=.*/CACHE_STORE=${ORIG_CACHE_STORE}/" /var/www/.env
 sed -i "s/^SESSION_DRIVER=.*/SESSION_DRIVER=${ORIG_SESSION_DRIVER}/" /var/www/.env
+sed -i "s/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=${ORIG_QUEUE_CONNECTION}/" /var/www/.env
 
 # Clear config cache again so Laravel picks up the restored values
 php artisan config:clear 2>/dev/null || true
@@ -300,9 +324,14 @@ if [ $MIGRATE_EXIT -eq 0 ]; then
     echo "✓ Migrations completed"
 else
     echo "✗ Migration failed with exit code $MIGRATE_EXIT"
-    # Show Laravel log for debugging
-    echo "--- Last 30 lines of Laravel log ---"
-    tail -n 30 /var/www/storage/logs/laravel.log 2>/dev/null || echo "(no log file)"
+    echo "--- Migration output ---"
+    cat /tmp/migrate_output.log 2>/dev/null || echo "(no output captured)"
+    echo "--- Last 50 lines of Laravel log ---"
+    tail -n 50 /var/www/storage/logs/laravel.log 2>/dev/null || echo "(no log file)"
+    echo "--- PHP error log ---"
+    find /var/log -name "php*" -type f -exec tail -n 20 {} \; 2>/dev/null || echo "(no php error log)"
+    echo "--- dmesg (last 5 lines, check for OOM/segfault) ---"
+    dmesg 2>/dev/null | tail -n 5 || echo "(dmesg not available)"
     exit 1
 fi
 
