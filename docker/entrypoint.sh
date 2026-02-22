@@ -290,10 +290,23 @@ fi
 # Clear any cached config to ensure fresh .env values are used
 php artisan config:clear 2>/dev/null || true
 
-# Run migration with env overrides as extra safety
-echo "  Running migration..."
+# Detect if this is a fresh database (no migrations table = first deploy)
 CACHE_STORE=array SESSION_DRIVER=array QUEUE_CONNECTION=sync \
-    php artisan migrate --force --no-interaction -v > /tmp/migrate_output.log 2>&1
+    php artisan migrate:status > /dev/null 2>&1
+DB_STATUS=$?
+
+if [ $DB_STATUS -ne 0 ]; then
+    echo "  Fresh database detected — using migrate:fresh..."
+    MIGRATE_CMD="migrate:fresh"
+else
+    echo "  Existing database — using regular migrate..."
+    MIGRATE_CMD="migrate"
+fi
+
+# Run migration
+echo "  Running $MIGRATE_CMD..."
+CACHE_STORE=array SESSION_DRIVER=array QUEUE_CONNECTION=sync \
+    php artisan $MIGRATE_CMD --force --no-interaction -v > /tmp/migrate_output.log 2>&1
 MIGRATE_EXIT=$?
 cat /tmp/migrate_output.log
 echo "  Migration exit code: $MIGRATE_EXIT"
