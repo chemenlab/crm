@@ -38,9 +38,10 @@ REDIS_PORT="${REDIS_PORT:-6379}"
 REDIS_USERNAME="${REDIS_USERNAME:-default}"
 
 # Cache & Queue & Session
-CACHE_STORE="${CACHE_STORE:-redis}"
-QUEUE_CONNECTION="${QUEUE_CONNECTION:-redis}"
-SESSION_DRIVER="${SESSION_DRIVER:-redis}"
+# Defaults are safe (file/database) — if Redis is available, set these explicitly in Dokploy
+CACHE_STORE="${CACHE_STORE:-file}"
+QUEUE_CONNECTION="${QUEUE_CONNECTION:-database}"
+SESSION_DRIVER="${SESSION_DRIVER:-file}"
 SESSION_LIFETIME="${SESSION_LIFETIME:-120}"
 
 # Broadcast
@@ -166,37 +167,74 @@ ORIG_QUEUE_CONNECTION=$(grep '^QUEUE_CONNECTION=' /var/www/.env | cut -d'=' -f2 
 
 echo "  Original drivers: CACHE=$ORIG_CACHE_STORE SESSION=$ORIG_SESSION_DRIVER QUEUE=$ORIG_QUEUE_CONNECTION"
 
-REDIS_RETRIES=10
-REDIS_COUNT=0
+# Read Redis config from .env
+REDIS_HOST_VAL=$(grep '^REDIS_HOST=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+REDIS_PORT_VAL=$(grep '^REDIS_PORT=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+REDIS_PASSWORD_VAL=$(grep '^REDIS_PASSWORD=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+REDIS_USERNAME_VAL=$(grep '^REDIS_USERNAME=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+
 REDIS_OK=0
 
-# Check Redis connectivity using raw PHP (avoids Laravel boot which may crash on missing DB tables)
-until [ $REDIS_COUNT -eq $REDIS_RETRIES ]; do
-    REDIS_COUNT=$((REDIS_COUNT + 1))
-    echo "Waiting for Redis... Attempt $REDIS_COUNT/$REDIS_RETRIES"
+# Skip Redis check entirely if REDIS_HOST is not configured
+if [ -z "$REDIS_HOST_VAL" ] || [ "$REDIS_HOST_VAL" = "" ]; then
+    echo "  REDIS_HOST is empty — skipping Redis check"
+else
+    echo "  Redis config: HOST=$REDIS_HOST_VAL PORT=${REDIS_PORT_VAL:-6379} USER=${REDIS_USERNAME_VAL:-none}"
 
-    REDIS_HOST_VAL=$(grep '^REDIS_HOST=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
-    REDIS_PORT_VAL=$(grep '^REDIS_PORT=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
-    REDIS_PASSWORD_VAL=$(grep '^REDIS_PASSWORD=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+    # First check if Redis port is reachable via TCP
+    REDIS_TCP_OK=0
+    for i in 1 2 3 4 5; do
+        if nc -z -w3 "$REDIS_HOST_VAL" "${REDIS_PORT_VAL:-6379}" 2>/dev/null; then
+            REDIS_TCP_OK=1
+            break
+        fi
+        echo "  TCP to Redis attempt $i/5..."
+        sleep 2
+    done
 
-    if php -r "
-        \$r = new Redis();
-        try {
-            \$r->connect('${REDIS_HOST_VAL:-127.0.0.1}', (int)'${REDIS_PORT_VAL:-6379}', 3);
-            \$pass = '${REDIS_PASSWORD_VAL:-null}';
-            if (\$pass && \$pass !== 'null') \$r->auth(\$pass);
-            \$r->ping();
-            echo 'ok';
-            exit(0);
-        } catch (Exception \$e) {
-            exit(1);
-        }
-    " 2>/dev/null; then
-        REDIS_OK=1
-        break
+    if [ $REDIS_TCP_OK -eq 0 ]; then
+        echo "  ✗ Cannot reach Redis at $REDIS_HOST_VAL:${REDIS_PORT_VAL:-6379} — TCP timeout"
+    else
+        echo "  ✓ Redis TCP connection OK"
+        # Now try actual Redis AUTH + PING
+        REDIS_RETRIES=5
+        REDIS_COUNT=0
+
+        until [ $REDIS_COUNT -eq $REDIS_RETRIES ]; do
+            REDIS_COUNT=$((REDIS_COUNT + 1))
+            echo "  Redis auth+ping attempt $REDIS_COUNT/$REDIS_RETRIES"
+
+            REDIS_ERR=$(php -r "
+                \$r = new Redis();
+                try {
+                    \$r->connect('${REDIS_HOST_VAL}', (int)'${REDIS_PORT_VAL:-6379}', 5);
+                    \$user = '${REDIS_USERNAME_VAL:-}';
+                    \$pass = '${REDIS_PASSWORD_VAL:-null}';
+                    if (\$pass && \$pass !== 'null') {
+                        if (\$user && \$user !== 'default' && \$user !== '') {
+                            \$r->auth([\$user, \$pass]);
+                        } else {
+                            \$r->auth(\$pass);
+                        }
+                    }
+                    \$r->ping();
+                    echo 'OK';
+                    exit(0);
+                } catch (Exception \$e) {
+                    fwrite(STDERR, \$e->getMessage());
+                    exit(1);
+                }
+            " 2>&1)
+
+            if [ $? -eq 0 ]; then
+                REDIS_OK=1
+                break
+            fi
+            echo "    Error: $REDIS_ERR"
+            sleep 2
+        done
     fi
-    sleep 2
-done
+fi
 
 if [ $REDIS_OK -eq 0 ]; then
     echo "⚠ Redis connection failed - falling back to file-based cache/sessions"
@@ -210,6 +248,22 @@ if [ $REDIS_OK -eq 0 ]; then
     ORIG_QUEUE_CONNECTION="database"
 else
     echo "✓ Redis connection established"
+    # If drivers are set to default (file/database), upgrade to redis for better performance
+    if [ "$ORIG_CACHE_STORE" = "file" ] || [ "$ORIG_CACHE_STORE" = "database" ]; then
+        echo "  ↑ Upgrading CACHE_STORE to redis"
+        sed -i 's/^CACHE_STORE=.*/CACHE_STORE=redis/' /var/www/.env
+        ORIG_CACHE_STORE="redis"
+    fi
+    if [ "$ORIG_SESSION_DRIVER" = "file" ] || [ "$ORIG_SESSION_DRIVER" = "database" ]; then
+        echo "  ↑ Upgrading SESSION_DRIVER to redis"
+        sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=redis/' /var/www/.env
+        ORIG_SESSION_DRIVER="redis"
+    fi
+    if [ "$ORIG_QUEUE_CONNECTION" = "database" ]; then
+        echo "  ↑ Upgrading QUEUE_CONNECTION to redis"
+        sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=redis/' /var/www/.env
+        ORIG_QUEUE_CONNECTION="redis"
+    fi
 fi
 
 # =============================================================================
