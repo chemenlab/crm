@@ -57,7 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     'SubscriptionPlan' => 'Тарифный план',
                 ];
                 $name = $modelNames[$model] ?? 'Запись';
-                
+
                 return response()->json([
                     'success' => false,
                     'message' => "{$name} не найден(а)",
@@ -109,15 +109,32 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Log all exceptions with context
+        // IMPORTANT: Use try-catch for auth()/request() — they may not be available
+        // during early boot or in CLI context (e.g., migrations), which would cause
+        // a cascading fatal error that masks the original exception.
         $exceptions->report(function (\Throwable $e) {
+            try {
+                $userId = auth()->id();
+            } catch (\Throwable) {
+                $userId = null;
+            }
+
+            try {
+                $url = request()->fullUrl();
+                $method = request()->method();
+            } catch (\Throwable) {
+                $url = php_sapi_name() === 'cli' ? 'CLI' : 'unknown';
+                $method = php_sapi_name() === 'cli' ? 'CLI' : 'unknown';
+            }
+
             \Illuminate\Support\Facades\Log::error('Exception occurred', [
                 'exception' => get_class($e),
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'user_id' => auth()->id(),
-                'url' => request()->fullUrl(),
-                'method' => request()->method(),
+                'user_id' => $userId,
+                'url' => $url,
+                'method' => $method,
             ]);
         });
     })->create();
