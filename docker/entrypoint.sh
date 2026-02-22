@@ -277,6 +277,16 @@ sed -i 's/^CACHE_STORE=.*/CACHE_STORE=array/' /var/www/.env
 sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' /var/www/.env
 sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' /var/www/.env
 
+# Ensure bootstrap/cache files exist (package:discover generates packages.php)
+# These are REQUIRED for Laravel to boot — without them, artisan crashes with exit 255
+if [ ! -f /var/www/bootstrap/cache/packages.php ]; then
+    echo "  ⚠ bootstrap/cache/packages.php missing — running package:discover..."
+    CACHE_STORE=array SESSION_DRIVER=array QUEUE_CONNECTION=sync \
+        php artisan package:discover --ansi 2>&1 || echo "  ⚠ package:discover had issues"
+else
+    echo "  ✓ bootstrap/cache/packages.php exists"
+fi
+
 # --- Diagnostics ---
 echo "  [DEBUG] PHP version:"
 php -v 2>&1 | head -1

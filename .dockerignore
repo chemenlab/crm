@@ -54,8 +54,6 @@ DEPLOY.md
 /azure-pipelines.yml
 
 # Cache
-/bootstrap/cache/*
-!/bootstrap/cache/.gitkeep
 /.phpunit.cache
 
 # Temporary files

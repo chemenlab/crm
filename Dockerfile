@@ -54,6 +54,18 @@ COPY . .
 # Complete composer autoload (skip scripts to avoid Laravel boot during build)
 RUN composer dump-autoload --no-dev --optimize --no-scripts
 
+# Generate package discovery manifest (required for Laravel to boot)
+# This creates bootstrap/cache/packages.php and services.php
+# Using safe env vars to avoid needing DB/Redis during build
+RUN touch .env && \
+    APP_ENV=production \
+    APP_KEY=base64:dummykeyfordockerbuildonlynotused1= \
+    CACHE_STORE=array \
+    SESSION_DRIVER=array \
+    QUEUE_CONNECTION=sync \
+    DB_CONNECTION=sqlite \
+    php artisan package:discover --ansi 2>&1 || true
+
 # Build frontend assets
 RUN npm run build
 
