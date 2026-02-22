@@ -28,7 +28,9 @@ RUN apk add --no-cache \
         bcmath \
         intl \
         opcache \
-        exif
+        exif \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -100,6 +102,8 @@ RUN apk add --no-cache \
         intl \
         opcache \
         exif \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     # Remove build dependencies to keep image small
     && apk del .build-deps
 
