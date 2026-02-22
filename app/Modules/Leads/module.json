@@ -1,0 +1,39 @@
+{
+    "slug": "leads",
+    "name": "Заявки",
+    "description": "Сбор заявок на услуги без привязки к дате. Kanban-доска, комментарии, todo-листы.",
+    "version": "1.0.0",
+    "author": "MasterPlan",
+    "category": "productivity",
+    "icon": "clipboard-list",
+    "pricing": {
+        "type": "free"
+    },
+    "minPlan": null,
+    "dependencies": [],
+    "hooks": {
+        "sidebar.menu": true,
+        "service.form.fields": true,
+        "public.booking.form": true,
+        "settings.sections": true
+    },
+    "routes": {
+        "web": "Routes/web.php",
+        "api": null
+    },
+    "migrations": "Database/Migrations",
+    "permissions": [],
+    "settings": {
+        "default_status": {
+            "type": "select",
+            "default": "new",
+            "options": ["new", "in_progress"],
+            "label": "Статус по умолчанию для новых заявок"
+        },
+        "notify_on_new_lead": {
+            "type": "boolean",
+            "default": true,
+            "label": "Уведомлять о новых заявках"
+        }
+    }
+}

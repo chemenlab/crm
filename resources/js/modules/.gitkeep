@@ -1,0 +1,11 @@
+# Frontend Modules Directory
+# Place your module frontend code here. Each module should have its own subdirectory.
+# Example structure:
+#
+# resources/js/modules/reviews/
+# ├── index.ts
+# ├── components/
+# ├── pages/
+# ├── hooks/
+# ├── api/
+# └── types/

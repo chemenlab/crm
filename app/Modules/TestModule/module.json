@@ -1,0 +1,43 @@
+{
+    "slug": "test-module",
+    "name": "Test Module",
+    "description": "A test module for verification",
+    "version": "1.0.0",
+    "author": "MasterPlan",
+    "category": "other",
+    "icon": "test",
+    "pricing": {
+        "type": "free"
+    },
+    "hooks": {
+        "sidebar.menu": true
+    },
+    "permissions": [],
+    "settings": {
+        "auto_request": {
+            "type": "boolean",
+            "default": true,
+            "label": "Автоматически запрашивать"
+        },
+        "request_delay_hours": {
+            "type": "number",
+            "default": 24,
+            "min": 1,
+            "max": 168,
+            "label": "Задержка в часах"
+        },
+        "notification_text": {
+            "type": "string",
+            "default": "Hello",
+            "minLength": 1,
+            "maxLength": 500,
+            "label": "Текст уведомления"
+        },
+        "display_mode": {
+            "type": "select",
+            "default": "compact",
+            "options": ["compact", "full", "minimal"],
+            "label": "Режим отображения"
+        }
+    }
+}

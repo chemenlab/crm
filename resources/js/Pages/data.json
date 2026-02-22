@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "header": "Introduction",
+        "type": "Table of Contents",
+        "status": "Done",
+        "target": "100",
+        "limit": "200",
+        "reviewer": "Eddie Lake"
+    },
+    {
+        "id": 2,
+        "header": "Executive Summary",
+        "type": "Executive Summary",
+        "status": "In Progress",
+        "target": "500",
+        "limit": "1000",
+        "reviewer": "Jamik Tashpulatov"
+    },
+    {
+        "id": 3,
+        "header": "Technical Approach",
+        "type": "Technical Approach",
+        "status": "Not Started",
+        "target": "1000",
+        "limit": "2000",
+        "reviewer": "Assign reviewer"
+    }
+]

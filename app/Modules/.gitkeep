@@ -1,0 +1,15 @@
+# Modules Directory
+# Place your modules here. Each module should have its own subdirectory.
+# Example structure:
+#
+# app/Modules/Reviews/
+# ├── module.json
+# ├── ModuleServiceProvider.php
+# ├── Controllers/
+# ├── Models/
+# ├── Services/
+# ├── Database/Migrations/
+# ├── Routes/
+# ├── Events/
+# ├── Listeners/
+# └── Hooks/

@@ -1,0 +1,68 @@
+{
+    "slug": "reviews",
+    "name": "Отзывы клиентов",
+    "description": "Сбор и отображение отзывов клиентов на публичной странице мастера",
+    "version": "1.0.0",
+    "author": "MasterPlan",
+    "category": "marketing",
+    "icon": "star",
+    "pricing": {
+        "type": "free"
+    },
+    "minPlan": null,
+    "dependencies": [],
+    "hooks": {
+        "sidebar.menu": true,
+        "client.card.tabs": true,
+        "public.page.sections": true,
+        "settings.sections": true
+    },
+    "routes": {
+        "web": "Routes/web.php",
+        "api": "Routes/api.php"
+    },
+    "migrations": "Database/Migrations",
+    "permissions": [
+        "reviews.view",
+        "reviews.create",
+        "reviews.delete",
+        "reviews.moderate"
+    ],
+    "settings": {
+        "auto_request": {
+            "type": "boolean",
+            "default": true,
+            "label": "Автоматически запрашивать отзыв после визита"
+        },
+        "request_delay_hours": {
+            "type": "number",
+            "default": 24,
+            "min": 1,
+            "max": 168,
+            "label": "Через сколько часов запрашивать отзыв"
+        },
+        "show_on_public_page": {
+            "type": "boolean",
+            "default": true,
+            "label": "Показывать отзывы на публичной странице"
+        },
+        "require_moderation": {
+            "type": "boolean",
+            "default": false,
+            "label": "Требовать модерацию отзывов"
+        },
+        "min_rating_to_show": {
+            "type": "number",
+            "default": 1,
+            "min": 1,
+            "max": 5,
+            "label": "Минимальный рейтинг для отображения"
+        },
+        "display_mode": {
+            "type": "select",
+            "default": "grid",
+            "options": ["grid", "list", "carousel"],
+            "label": "Режим отображения на публичной странице"
+        }
+    }
+}

@@ -1,0 +1,1800 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Booking CRM — Mobile API",
+        "description": "REST API для мобильного приложения мастера/сотрудника. Поддерживает офлайн-режим с дельта-синхронизацией. Авторизация через Bearer-токен (Sanctum).",
+        "contact": {
+            "name": "Booking CRM Support"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/api",
+            "description": "Production / Dev сервер"
+        }
+    ],
+    "paths": {
+        "/mobile/appointments": {
+            "get": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Список записей",
+                "description": "Возвращает записи с пагинацией. Поддерживает фильтрацию и дельта-синхронизацию через updated_after.",
+                "operationId": "99efabf248b4078dd3f9726884b836ae",
+                "parameters": [
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-02-01"
+                        }
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-02-28"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "scheduled",
+                                "confirmed",
+                                "completed",
+                                "cancelled",
+                                "no_show"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "updated_after",
+                        "in": "query",
+                        "description": "Дельта-синхронизация: вернуть записи изменённые после этой даты",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2026-02-20T00:00:00Z"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 50,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список записей",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Appointment"
+                                            }
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        },
+                                        "sync_timestamp": {
+                                            "description": "Сохрани для следующего updated_after",
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-02-22T10:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Создать запись",
+                "description": "Время start_time передаётся в UTC ISO 8601. end_time вычисляется автоматически из длительности услуги.",
+                "operationId": "dc626d4f915a593c07b2c2057535064e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "client_id",
+                                    "service_id",
+                                    "start_time"
+                                ],
+                                "properties": {
+                                    "client_id": {
+                                        "type": "integer",
+                                        "example": 7
+                                    },
+                                    "service_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "start_time": {
+                                        "description": "UTC ISO 8601",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-02-22T09:00:00Z"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Клиент предпочитает без звонков",
+                                        "nullable": true
+                                    },
+                                    "price": {
+                                        "description": "Если не указана — берётся из услуги",
+                                        "type": "number",
+                                        "example": 2500,
+                                        "nullable": true
+                                    },
+                                    "option_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2
+                                        ],
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Запись создана",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Appointment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    },
+                    "403": {
+                        "description": "Клиент или услуга не принадлежат мастеру"
+                    },
+                    "422": {
+                        "description": "Ошибка валидации или лимит записей достигнут"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/appointments/{id}": {
+            "put": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Обновить запись",
+                "operationId": "0da90f344de2063fbf783da363781c21",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 42
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "client_id",
+                                    "service_id",
+                                    "start_time",
+                                    "status",
+                                    "price"
+                                ],
+                                "properties": {
+                                    "client_id": {
+                                        "type": "integer",
+                                        "example": 7
+                                    },
+                                    "service_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-02-22T09:00:00Z"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "scheduled",
+                                            "confirmed",
+                                            "completed",
+                                            "cancelled",
+                                            "no_show"
+                                        ]
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 2500
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "cash",
+                                            "card"
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "option_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Запись обновлена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Appointment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    },
+                    "403": {
+                        "description": "Нет доступа к записи"
+                    },
+                    "404": {
+                        "description": "Запись не найдена"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Удалить запись",
+                "operationId": "72df48156ae8e2b3f3f8def0162992d2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 42
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Запись удалена",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Запись удалена"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Нет доступа"
+                    },
+                    "404": {
+                        "description": "Запись не найдена"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/appointments/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Сменить статус записи",
+                "description": "При статусе completed можно указать payment_method.",
+                "operationId": "016092348192326c1661eb92f96615e9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 42
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "scheduled",
+                                            "confirmed",
+                                            "completed",
+                                            "cancelled",
+                                            "no_show"
+                                        ],
+                                        "example": "completed"
+                                    },
+                                    "payment_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "cash",
+                                            "card"
+                                        ],
+                                        "example": "cash",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Статус обновлён",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Статус обновлён"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Appointment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Нет доступа"
+                    },
+                    "404": {
+                        "description": "Запись не найдена"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Регистрация нового мастера",
+                "description": "Создаёт аккаунт, активирует 14-дневный пробный период плана Maximum и отправляет 6-значный код верификации на email. **Токен не выдаётся** — используйте /verify-email после подтверждения почты. Лимит: 5 попыток в минуту с одного IP.",
+                "operationId": "534fb8fe60d3fb714abeb2c6449ad1c4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "phone",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Иван Мастер"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "master@example.com"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+79991234567"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secret123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "device_name": {
+                                        "description": "Имя устройства для токена (опционально)",
+                                        "type": "string",
+                                        "example": "iPhone 15 Pro"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Аккаунт создан, код отправлен на email",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Регистрация выполнена. Код подтверждения отправлен на master@example.com."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибки валидации (email/phone не уникальны, пароль слабый и т.д.)"
+                    },
+                    "429": {
+                        "description": "Слишком много попыток"
+                    }
+                }
+            }
+        },
+        "/mobile/verify-email": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Подтверждение email и получение токена",
+                "description": "Принимает 6-значный код из письма. При успехе выдаёт Bearer-токен — после этого можно работать с API. Код действует 15 минут. Лимит: 5 попыток в минуту с одного IP.",
+                "operationId": "d9e46e65f3c6a2180a1f873ea665dedd",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "master@example.com"
+                                    },
+                                    "code": {
+                                        "description": "6-значный код из письма",
+                                        "type": "string",
+                                        "example": "048271"
+                                    },
+                                    "device_name": {
+                                        "description": "Имя устройства для токена (опционально)",
+                                        "type": "string",
+                                        "example": "iPhone 15 Pro"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email подтверждён, токен выдан",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123xyz..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Неверный или истёкший код"
+                    },
+                    "429": {
+                        "description": "Слишком много попыток"
+                    }
+                }
+            }
+        },
+        "/mobile/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Авторизация мастера",
+                "description": "Возвращает Bearer-токен. Лимит: 5 попыток в минуту с одного IP.",
+                "operationId": "4ce5ec16ee5494b477e3fd3911170ae8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "master@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret123"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "iPhone 15 Pro"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Успешный вход",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123xyz..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Неверный email или пароль"
+                    },
+                    "422": {
+                        "description": "Ошибка валидации"
+                    },
+                    "429": {
+                        "description": "Слишком много попыток"
+                    }
+                }
+            }
+        },
+        "/mobile/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Выход из системы",
+                "description": "Отзывает текущий токен. Токены других устройств остаются активными.",
+                "operationId": "6eaf45fafb47fdc78b0f88a9d9609bc4",
+                "responses": {
+                    "200": {
+                        "description": "Выход выполнен",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Выход выполнен"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Данные текущего пользователя",
+                "description": "Профиль мастера. Timezone используется клиентом для конвертации UTC→локальное время.",
+                "operationId": "356ff66d07c9faf2c833557d38b614c1",
+                "responses": {
+                    "200": {
+                        "description": "Данные пользователя",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/clients": {
+            "get": {
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Список клиентов",
+                "description": "Поиск по имени, телефону, email. Поддерживает дельта-синхронизацию через updated_after.",
+                "operationId": "7aeb7c01c7d4a9f55f8584a6a6a2f685",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Поиск по имени, телефону или email",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Анна"
+                        }
+                    },
+                    {
+                        "name": "updated_after",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2026-02-20T00:00:00Z"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 50,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список клиентов",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Client"
+                                            }
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        },
+                                        "sync_timestamp": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-02-22T10:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Создать клиента",
+                "operationId": "cba4e7e6a3e15830692d967d0aca8801",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Анна Петрова"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+79991234567",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "anna@example.com",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Предпочитает утренние записи",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Клиент создан",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Client"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации или лимит клиентов достигнут"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/clients/{id}": {
+            "put": {
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Обновить клиента",
+                "operationId": "cd1f3c6b3f25a9df225720d56cf31edd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 7
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Анна Петрова"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+79991234567",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "nullable": true
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Клиент обновлён",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Client"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Нет доступа"
+                    },
+                    "404": {
+                        "description": "Клиент не найден"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Сводка для главного экрана",
+                "description": "Возвращает статистику за сегодня, за текущий месяц и ближайшие 5 записей. Все даты в UTC, today — в timezone мастера.",
+                "operationId": "1538a22e6440edbd30436be4e52a5069",
+                "responses": {
+                    "200": {
+                        "description": "Сводная статистика",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "today": {
+                                                    "properties": {
+                                                        "date": {
+                                                            "type": "string",
+                                                            "example": "2026-02-22"
+                                                        },
+                                                        "appointments_count": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "completed_count": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "revenue": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 4500
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "month": {
+                                                    "properties": {
+                                                        "appointments_count": {
+                                                            "type": "integer",
+                                                            "example": 48
+                                                        },
+                                                        "revenue": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 72000
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "upcoming_appointments": {
+                                                    "description": "Ближайшие 5 записей со статусом scheduled или confirmed",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Appointment"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "sync_timestamp": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-02-22T10:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/schedule": {
+            "get": {
+                "tags": [
+                    "Schedule"
+                ],
+                "summary": "Расписание мастера",
+                "description": "Возвращает рабочее расписание по дням недели (7 записей). Время в timezone мастера.",
+                "operationId": "3a54a90eb410f806920c577dc05ddace",
+                "responses": {
+                    "200": {
+                        "description": "Расписание по дням недели",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "description": "Массив из 7 элементов (один на каждый день недели)",
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Schedule"
+                                            }
+                                        },
+                                        "sync_timestamp": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-02-22T10:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/services": {
+            "get": {
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Список услуг",
+                "description": "Только чтение. Редактирование услуг доступно только через веб-интерфейс.",
+                "operationId": "617712f2ab02c952c30ba50042a5e166",
+                "parameters": [
+                    {
+                        "name": "updated_after",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2026-02-20T00:00:00Z"
+                        }
+                    },
+                    {
+                        "name": "active_only",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список услуг",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Service"
+                                            }
+                                        },
+                                        "sync_timestamp": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-02-22T10:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/slots": {
+            "get": {
+                "tags": [
+                    "Slots"
+                ],
+                "summary": "Доступные временные слоты",
+                "description": "Возвращает список доступных слотов на указанную дату для выбранной услуги. Учитывает расписание мастера, существующие записи и буферное время. Слоты в формате HH:MM в timezone мастера.",
+                "operationId": "6c7c0448afeb0e0ff929556e15b196c9",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Дата в формате YYYY-MM-DD (в timezone мастера)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2026-02-23"
+                        }
+                    },
+                    {
+                        "name": "service_id",
+                        "in": "query",
+                        "description": "ID услуги для расчёта длительности и буфера",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список доступных слотов",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "date": {
+                                            "type": "string",
+                                            "example": "2026-02-23"
+                                        },
+                                        "data": {
+                                            "description": "Массив слотов в формате HH:MM в timezone мастера",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "example": "09:00"
+                                            }
+                                        },
+                                        "sync_timestamp": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-02-22T10:00:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    },
+                    "404": {
+                        "description": "Услуга не найдена"
+                    },
+                    "422": {
+                        "description": "Ошибка валидации"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/mobile/sync": {
+            "get": {
+                "tags": [
+                    "Sync"
+                ],
+                "summary": "Дельта-синхронизация",
+                "description": "Возвращает все записи, клиентов и услуги, изменённые после указанной даты. Используйте sync_timestamp из предыдущего ответа как updated_after для следующего запроса. Timestamp фиксируется ДО выполнения запросов, чтобы не пропустить записи.",
+                "operationId": "81eda8d1b53e5229c5d95bee6d98e25c",
+                "parameters": [
+                    {
+                        "name": "updated_after",
+                        "in": "query",
+                        "description": "ISO 8601 дата-время в UTC. Возвращает только записи с updated_at > этого значения.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2026-02-22T10:00:00Z"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Изменённые данные с момента updated_after",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "appointments": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Appointment"
+                                                    }
+                                                },
+                                                "clients": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Client"
+                                                    }
+                                                },
+                                                "services": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Service"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "counts": {
+                                            "properties": {
+                                                "appointments": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "clients": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "services": {
+                                                    "type": "integer",
+                                                    "example": 0
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "sync_timestamp": {
+                                            "description": "Используйте это значение как updated_after в следующем запросе",
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-02-22T10:05:00Z"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован"
+                    },
+                    "422": {
+                        "description": "updated_after обязателен"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Appointment": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "client_id": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "service_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "start_time": {
+                        "description": "UTC ISO 8601",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-02-22T09:00:00Z"
+                    },
+                    "end_time": {
+                        "description": "UTC ISO 8601",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-02-22T10:00:00Z"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "scheduled",
+                            "confirmed",
+                            "completed",
+                            "cancelled",
+                            "no_show"
+                        ],
+                        "example": "scheduled"
+                    },
+                    "payment_method": {
+                        "type": "string",
+                        "enum": [
+                            "cash",
+                            "card"
+                        ],
+                        "example": "cash",
+                        "nullable": true
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 2500
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "Клиент предпочитает без звонков",
+                        "nullable": true
+                    },
+                    "client": {
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Анна Петрова"
+                            },
+                            "phone": {
+                                "type": "string",
+                                "example": "+79991234567"
+                            },
+                            "email": {
+                                "type": "string",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "service": {
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Стрижка"
+                            },
+                            "duration": {
+                                "type": "integer",
+                                "example": 60
+                            },
+                            "color": {
+                                "type": "string",
+                                "example": "#6366f1"
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-02-20T08:30:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-02-18T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationMeta": {
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 50
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 230
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Иван Мастер"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "master@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+79991234567"
+                    },
+                    "timezone": {
+                        "description": "Используется клиентом для конвертации UTC дат",
+                        "type": "string",
+                        "example": "Europe/Moscow"
+                    },
+                    "slot_step": {
+                        "type": "integer",
+                        "example": 30
+                    },
+                    "buffer_time": {
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "avatar_url": {
+                        "type": "string",
+                        "example": "https://example.com/storage/avatars/1.jpg",
+                        "nullable": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "ivan-master"
+                    },
+                    "currency": {
+                        "type": "string",
+                        "example": "RUB"
+                    }
+                },
+                "type": "object"
+            },
+            "Client": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 7
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Анна Петрова"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+79991234567",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "anna@example.com",
+                        "nullable": true
+                    },
+                    "notes": {
+                        "type": "string",
+                        "example": "Предпочитает утренние записи",
+                        "nullable": true
+                    },
+                    "total_visits": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "total_spent": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 18500
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-02-20T08:30:00Z"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-10-01T10:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Schedule": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "day_of_week": {
+                        "description": "0 = воскресенье, 1 = понедельник, ..., 6 = суббота (Carbon)",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "is_working": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "start_time": {
+                        "description": "Время начала работы HH:MM",
+                        "type": "string",
+                        "example": "09:00",
+                        "nullable": true
+                    },
+                    "end_time": {
+                        "description": "Время окончания работы HH:MM",
+                        "type": "string",
+                        "example": "18:00",
+                        "nullable": true
+                    },
+                    "break_start": {
+                        "description": "Начало перерыва HH:MM",
+                        "type": "string",
+                        "example": "13:00",
+                        "nullable": true
+                    },
+                    "break_end": {
+                        "description": "Конец перерыва HH:MM",
+                        "type": "string",
+                        "example": "14:00",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Service": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Стрижка мужская"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Классическая мужская стрижка",
+                        "nullable": true
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 1500
+                    },
+                    "duration": {
+                        "description": "Длительность в минутах",
+                        "type": "integer",
+                        "example": 60
+                    },
+                    "color": {
+                        "description": "Цвет для отображения в календаре",
+                        "type": "string",
+                        "example": "#6366f1"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "custom_slot_step": {
+                        "description": "Шаг слота для этой услуги",
+                        "type": "integer",
+                        "example": 30,
+                        "nullable": true
+                    },
+                    "custom_buffer_time": {
+                        "description": "Буферное время после записи",
+                        "type": "integer",
+                        "example": 15,
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-15T10:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "Sanctum",
+                "description": "Введите токен, полученный из POST /api/mobile/login"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Авторизация"
+        },
+        {
+            "name": "Appointments",
+            "description": "Записи клиентов"
+        },
+        {
+            "name": "Clients",
+            "description": "База клиентов"
+        },
+        {
+            "name": "Services",
+            "description": "Услуги (только чтение)"
+        },
+        {
+            "name": "Slots",
+            "description": "Доступные временные слоты"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Сводная информация"
+        },
+        {
+            "name": "Schedule",
+            "description": "Расписание мастера"
+        },
+        {
+            "name": "Sync",
+            "description": "Дельта-синхронизация для офлайн-режима"
+        }
+    ]
+}

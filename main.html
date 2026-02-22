@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MClient — CRM для мастеров и сферы услуг</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #1a1a1a;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        buttons {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Mesh Gradients - MClient Emerald/Teal Theme */
+        .mesh-gradient-top {
+            background: radial-gradient(circle at 50% 0%, rgba(167, 243, 208, 0.8) 0%, rgba(209, 250, 229, 0.4) 40%, rgba(248, 249, 250, 0) 70%);
+            filter: blur(80px);
+        }
+
+        .mesh-accent-1 {
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
+            filter: blur(60px);
+        }
+
+        .mesh-accent-2 {
+            background: radial-gradient(circle, rgba(45, 212, 191, 0.4) 0%, rgba(255, 255, 255, 0) 70%);
+            filter: blur(60px);
+        }
+
+        /* Glassmorphism */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px -2px rgba(16, 185, 129, 0.05);
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid rgba(16, 185, 129, 0.05);
+            box-shadow: 0 20px 40px -4px rgba(16, 185, 129, 0.05);
+        }
+
+        /* Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .fade-up {
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased overflow-x-hidden">
+
+    <!-- Top Mesh Background -->
+    <div class="absolute top-0 left-0 w-full h-[120vh] z-0 pointer-events-none overflow-hidden">
+        <div class="mesh-gradient-top w-full h-full absolute top-0"></div>
+        <div class="mesh-accent-1 w-[600px] h-[600px] absolute top-[-100px] left-[-100px]"></div>
+        <div class="mesh-accent-2 w-[600px] h-[600px] absolute top-[-50px] right-[-100px]"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl">
+        <div class="glass-nav rounded-full px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer group relative">
+                <!-- M Logo: Professional Geometry -->
+                <div class="w-10 h-10 relative flex items-center justify-center -translate-y-[2.5px]">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        class="text-emerald-500 group-hover:scale-110 transition-transform duration-300 relative z-10">
+                        <path d="M4 20V8L12 16L20 8V20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                            stroke-linejoin="round"></path>
+                        <path d="M4 20H20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
+                    </svg>
+                    <!-- Glow behind logo -->
+                    <div
+                        class="absolute inset-0 bg-emerald-500/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    </div>
+                </div>
+                <span
+                    class="text-xl font-bold tracking-tight text-black transition-colors group-hover:text-emerald-600">MClient</span>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-500">
+                <a href="#features" class="hover:text-emerald-600 transition-colors">Возможности</a>
+                <a href="#pricing" class="hover:text-emerald-600 transition-colors">Тарифы</a>
+                <a href="#testimonials" class="hover:text-emerald-600 transition-colors">Отзывы</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <a href="#"
+                    class="text-sm font-medium text-zinc-600 hover:text-emerald-600 transition-colors hidden sm:block">Вход</a>
+                <a href="#"
+                    class="px-5 py-2.5 rounded-full bg-black text-white text-sm font-medium transition-transform hover:scale-105 shadow-xl shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:bg-emerald-600">
+                    Начать бесплатно
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 z-10">
+        <div class="max-w-[1200px] mx-auto px-6 text-center">
+
+            <div class="fade-up inline-flex items-center gap-2 mb-6">
+                <span class="text-xs font-semibold text-emerald-600 uppercase tracking-widest">● CRM для сферы
+                    услуг</span>
+            </div>
+
+            <h1 class="fade-up text-5xl md:text-7xl font-bold tracking-tighter mb-6 text-[#1A1A1A] leading-[1.05] animate-[fadeUp_0.8s_0.1s_forwards] opacity-0"
+                style="font-family: 'Outfit', sans-serif;">
+                CRM для Мастеров и<br>Специалистов Услуг
+            </h1>
+
+            <p
+                class="fade-up text-sm md:text-base text-zinc-500 max-w-2xl mx-auto mb-10 animate-[fadeUp_0.8s_0.2s_forwards] opacity-0 leading-relaxed">
+                Управляйте бизнесом легко — всё в одном месте. Современная облачная CRM-система для индивидуальных
+                мастеров, салонов красоты, частных специалистов и малого бизнеса.
+            </p>
+
+            <div
+                class="fade-up flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-[fadeUp_0.8s_0.3s_forwards] opacity-0">
+                <a href="#"
+                    class="px-8 py-3 rounded-full bg-emerald-600 text-white font-medium text-sm shadow-xl shadow-emerald-500/30 hover:bg-emerald-700 transition-all flex items-center gap-2">
+                    Попробовать бесплатно
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+                <a href="#"
+                    class="px-8 py-3 rounded-full bg-white text-zinc-700 border border-zinc-200 font-medium text-sm hover:bg-zinc-50 transition-all flex items-center gap-2">
+                    <i data-lucide="play-circle" class="w-4 h-4 text-emerald-500"></i>
+                    Посмотреть демо
+                </a>
+            </div>
+
+            <!-- Dashboard Mockup -->
+            <div class="fade-up relative animate-[fadeUp_0.8s_0.5s_forwards] opacity-0 max-w-5xl mx-auto">
+                <div
+                    class="glass-card rounded-[2.5rem] p-6 bg-white border border-emerald-100/50 shadow-[0_50px_100px_-20px_rgba(16,185,129,0.1)] backdrop-blur-xl relative overflow-hidden text-left">
+
+                    <!-- Top Bar -->
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-2xl font-bold text-[#1A1A1A]">Обзор Бизнеса</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="relative hidden sm:block">
+                                <i data-lucide="search"
+                                    class="w-5 h-5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                                <input type="text" placeholder="Найти клиента..."
+                                    class="pl-10 pr-4 py-2 rounded-full bg-zinc-50 text-sm w-64 border-none outline-none focus:ring-1 focus:ring-emerald-200 text-zinc-600">
+                            </div>
+                            <button
+                                class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-200">
+                                <i data-lucide="bell" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Main Grid -->
+                    <div class="grid grid-cols-12 gap-6">
+                        <!-- Left Col: Stats -->
+                        <div class="col-span-12 md:col-span-8 space-y-6">
+                            <!-- Stats Row -->
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    </div>
+                                    <span
+                                        class="px-3 py-1 rounded-full bg-white border border-emerald-100 text-xs font-semibold shadow-sm text-zinc-700">Онлайн
+                                        Запись</span>
+                                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <span
+                                        class="px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-medium shadow-md shadow-emerald-200">Сегодня</span>
+                                    <span
+                                        class="px-3 py-1 rounded-full bg-zinc-100 text-zinc-500 text-xs font-medium">Завтра</span>
+                                </div>
+                            </div>
+
+                            <!-- Big Percent & Chart Area -->
+                            <div class="flex items-end gap-12 mt-4">
+                                <div>
+                                    <div class="flex items-center gap-2 text-zinc-400 text-sm mb-1">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Доход за месяц
+                                    </div>
+                                    <div class="text-6xl font-bold text-[#1A1A1A] tracking-tighter">₽ 124k</div>
+                                    <div class="text-xs text-zinc-400 mt-2 flex items-center gap-1">
+                                        <i data-lucide="trending-up" class="w-3 h-3 text-emerald-500"></i>
+                                        <span class="text-emerald-600 font-medium">+18%</span> к прошлому месяцу
+                                    </div>
+                                </div>
+
+                                <!-- Abstract Bars -->
+                                <div class="flex items-end gap-3 h-24 pb-2">
+                                    <div class="w-3 bg-emerald-100 rounded-full h-[30%]"></div>
+                                    <div class="w-3 bg-emerald-200 rounded-full h-[50%]"></div>
+                                    <div class="w-3 bg-teal-300 rounded-full h-[70%]"></div>
+                                    <div class="w-3 bg-emerald-500 rounded-full h-[100%] shadow-lg shadow-emerald-200">
+                                    </div>
+                                    <div class="w-3 bg-emerald-200 rounded-full h-[60%]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Col: Card -->
+                        <div class="col-span-12 md:col-span-4">
+                            <div
+                                class="bg-[#dcfce7] rounded-[2rem] p-6 h-full flex flex-col justify-between relative overflow-hidden group border border-emerald-100">
+                                <div>
+                                    <div class="text-sm font-semibold text-emerald-900 mb-1">Новые Клиенты</div>
+                                    <div class="text-xs text-emerald-700 uppercase tracking-wider">База</div>
+                                </div>
+                                <div class="mt-8">
+                                    <div class="text-4xl font-bold text-emerald-900 tracking-tight">+ 24</div>
+                                    <div class="text-xs text-emerald-700 mt-1">за эту неделю</div>
+                                </div>
+                                <svg class="absolute bottom-0 right-0 w-24 h-24 text-emerald-600 opacity-10"
+                                    viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services / For Whom Section (Editorial Style) -->
+    <section id="for-whom" class="py-24 bg-white border-b border-zinc-100">
+        <div class="max-w-[1200px] mx-auto px-6">
+
+            <!-- Header -->
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+                <div>
+                    <span
+                        class="text-emerald-500 font-mono text-sm font-medium tracking-wider uppercase mb-4 block">Целевая
+                        аудитория</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-tight"
+                        style="font-family: 'Outfit', sans-serif;">
+                        Создано для тех,<br>кто ценит своё время
+                    </h2>
+                </div>
+                <p class="text-zinc-500 max-w-md text-lg leading-relaxed">
+                    Универсальная CRM-система, которая адаптируется под специфику вашего бизнеса
+                </p>
+            </div>
+
+            <!-- Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <!-- Card 1: Beauty (Large) -->
+                <div class="for-whom-card lg:col-span-2 lg:row-span-2 group">
+                    <div
+                        class="bg-zinc-50 rounded-3xl p-8 lg:p-10 h-full relative overflow-hidden hover:bg-zinc-100/80 transition-colors duration-500">
+                        <!-- Number -->
+                        <span class="absolute top-6 right-8 text-8xl font-black text-zinc-200/50 font-mono">01</span>
+
+                        <div class="relative z-10">
+                            <div
+                                class="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full text-xs font-medium text-zinc-600 shadow-sm mb-6">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                Самый популярный сегмент
+                            </div>
+
+                            <h3 class="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-4">Бьюти-индустрия</h3>
+                            <p class="text-zinc-500 text-lg mb-8 max-w-lg">
+                                Салоны красоты, барбершопы, студии маникюра, косметологии и все бьюти-услуги
+                            </p>
+
+                            <!-- Mini UI Preview -->
+                            <div class="bg-white rounded-2xl p-4 shadow-lg shadow-zinc-200/50 max-w-sm">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-sm font-semibold text-zinc-800">Записи на сегодня</span>
+                                    <span
+                                        class="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded">+12%</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-3 p-2 bg-zinc-50 rounded-lg">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-400 to-pink-500">
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-zinc-800">Анна К.</div>
+                                            <div class="text-xs text-zinc-400">Стрижка + укладка</div>
+                                        </div>
+                                        <span class="text-xs font-medium text-zinc-600">10:00</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-2 bg-zinc-50 rounded-lg">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500">
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-zinc-800">Мария С.</div>
+                                            <div class="text-xs text-zinc-400">Маникюр</div>
+                                        </div>
+                                        <span class="text-xs font-medium text-zinc-600">11:30</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Private -->
+                <div class="for-whom-card group">
+                    <div
+                        class="bg-emerald-600 rounded-3xl p-6 h-full relative overflow-hidden text-white hover:bg-emerald-700 transition-colors duration-500">
+                        <span class="absolute top-4 right-6 text-6xl font-black text-white/10 font-mono">02</span>
+
+                        <div class="relative z-10">
+                            <div
+                                class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full text-xs font-medium text-white backdrop-blur-sm mb-4">
+                                <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                                Бесплатно навсегда
+                            </div>
+
+                            <h3 class="text-2xl font-bold text-white mb-2">Частные мастера</h3>
+                            <p class="text-emerald-100/80 text-sm leading-relaxed">
+                                Массажисты, визажисты, мастера на дому
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Education -->
+                <div class="for-whom-card group">
+                    <div
+                        class="bg-zinc-50 rounded-3xl p-6 h-full relative overflow-hidden hover:bg-zinc-100/80 transition-colors duration-500">
+                        <span class="absolute top-4 right-6 text-6xl font-black text-zinc-200/50 font-mono">03</span>
+
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-bold text-[#1A1A1A] mb-2">Репетиторы</h3>
+                            <p class="text-zinc-500 text-sm leading-relaxed mb-4">
+                                Коучи, тренеры, преподаватели
+                            </p>
+                            <div class="flex gap-2">
+                                <span class="px-2 py-1 bg-white rounded text-xs text-zinc-600">Расписание</span>
+                                <span class="px-2 py-1 bg-white rounded text-xs text-zinc-600">Оплаты</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Photo -->
+                <div class="for-whom-card group">
+                    <div
+                        class="bg-zinc-900 rounded-3xl p-6 h-full relative overflow-hidden text-white hover:bg-zinc-800 transition-colors duration-500">
+                        <span class="absolute top-4 right-6 text-6xl font-black text-white/5 font-mono">04</span>
+
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-bold text-white mb-2">Фотостудии</h3>
+                            <p class="text-zinc-400 text-sm leading-relaxed mb-4">
+                                Лофты, аренда локаций
+                            </p>
+                            <div class="flex gap-2">
+                                <span class="px-2 py-1 bg-white/10 rounded text-xs text-zinc-300">Почасовая</span>
+                                <span class="px-2 py-1 bg-white/10 rounded text-xs text-zinc-300">Боксы</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Medical -->
+                <div class="for-whom-card group">
+                    <div
+                        class="bg-zinc-50 rounded-3xl p-6 h-full relative overflow-hidden hover:bg-zinc-100/80 transition-colors duration-500">
+                        <span class="absolute top-4 right-6 text-6xl font-black text-zinc-200/50 font-mono">05</span>
+
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-bold text-[#1A1A1A] mb-2">Косметологи</h3>
+                            <p class="text-zinc-500 text-sm leading-relaxed mb-4">
+                                Клиники, медицинские специалисты
+                            </p>
+                            <div class="flex gap-2">
+                                <span class="px-2 py-1 bg-white rounded text-xs text-zinc-600">Карточки</span>
+                                <span class="px-2 py-1 bg-white rounded text-xs text-zinc-600">История</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6: More -->
+                <div class="for-whom-card group">
+                    <div
+                        class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-6 h-full relative overflow-hidden border border-emerald-100 hover:from-emerald-100 hover:to-teal-100 transition-colors duration-500">
+                        <span class="absolute top-4 right-6 text-6xl font-black text-emerald-200/50 font-mono">+</span>
+
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-bold text-emerald-900 mb-2">И ещё 200+</h3>
+                            <p class="text-emerald-700/70 text-sm leading-relaxed mb-4">
+                                Автосервисы, ремонт, консультанты...
+                            </p>
+                            <a href="#pricing"
+                                class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
+                                Все профессии
+                                <span>→</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Stats -->
+            <div class="mt-16 flex flex-wrap justify-center gap-8 lg:gap-16">
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-[#1A1A1A]">15K+</div>
+                    <div class="text-sm text-zinc-500">Активных пользователей</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-[#1A1A1A]">200+</div>
+                    <div class="text-sm text-zinc-500">Профессий</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-[#1A1A1A]">98%</div>
+                    <div class="text-sm text-zinc-500">Довольных клиентов</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-emerald-500">0₽</div>
+                    <div class="text-sm text-zinc-500">Стартовый тариф</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CSS Animation for For Whom Cards (replaced GSAP to fix visibility) -->
+    <style>
+        /* Animation for For Whom Cards */
+        .for-whom-card {
+            animation: fadeInUp 0.6s ease-out forwards;
+            animation-delay: calc(var(--card-index, 0) * 0.1s);
+        }
+
+        .for-whom-card:nth-child(1) {
+            --card-index: 0;
+        }
+
+        .for-whom-card:nth-child(2) {
+            --card-index: 1;
+        }
+
+        .for-whom-card:nth-child(3) {
+            --card-index: 2;
+        }
+
+        .for-whom-card:nth-child(4) {
+            --card-index: 3;
+        }
+
+        .for-whom-card:nth-child(5) {
+            --card-index: 4;
+        }
+
+        .for-whom-card:nth-child(6) {
+            --card-index: 5;
+        }
+
+        /* Animation for Features Cards */
+        .features-card {
+            animation: fadeInUp 0.6s ease-out forwards;
+            animation-delay: calc(var(--feature-index, 0) * 0.12s);
+        }
+
+        .features-card:nth-child(1) {
+            --feature-index: 0;
+        }
+
+        .features-card:nth-child(2) {
+            --feature-index: 1;
+        }
+
+        .features-card:nth-child(3) {
+            --feature-index: 2;
+        }
+
+        .features-card:nth-child(4) {
+            --feature-index: 3;
+        }
+
+        .features-card:nth-child(5) {
+            --feature-index: 4;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <!-- Why Us Section (GSAP Stacking Cards) -->
+    <section class="bg-white relative" id="why-us">
+
+        <div class="max-w-[1200px] mx-auto px-6 py-24">
+            <div class="text-center mb-24 fade-up">
+                <div
+                    class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold shadow-sm">
+                    <span>Преимущества</span>
+                </div>
+                <h2 class="text-5xl font-bold text-[#1A1A1A] tracking-tight leading-tight"
+                    style="font-family: 'Outfit', sans-serif;">
+                    Почему выбирают MClient?
+                </h2>
+            </div>
+
+            <div class="relative">
+
+                <!-- Card 1: Simplicity -->
+                <div
+                    class="stack-card sticky top-32 mb-12 bg-white rounded-[3rem] p-10 md:p-16 border border-zinc-100 shadow-2xl shadow-zinc-200/50 flex flex-col md:flex-row items-center gap-12 overflow-hidden">
+                    <div class="w-full md:w-1/2 relative z-10">
+                        <div
+                            class="w-16 h-16 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-900 mb-8 font-bold text-2xl shadow-inner">
+                            01</div>
+                        <h3 class="text-4xl font-bold text-[#1A1A1A] mb-6">Простота</h3>
+                        <p class="text-lg text-zinc-500 leading-relaxed mb-8">
+                            Создано специально для частных мастеров. Никаких сложных настроек и лишних кнопок. Вы
+                            сможете вести запись и учет самостоятельно, не отвлекаясь от работы.
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3 text-zinc-600 font-medium">
+                                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+                                Интуитивный дизайн
+                            </li>
+                            <li class="flex items-center gap-3 text-zinc-600 font-medium">
+                                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i>
+                                Быстрый старт за 2 минуты
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="w-full md:w-1/2 relative group" style="perspective: 1000px;">
+                        <!-- Visual: 3D Composition -->
+                        <div
+                            class="aspect-square bg-zinc-50 rounded-[2rem] border border-zinc-100 p-8 relative flex items-center justify-center overflow-visible">
+
+                            <!-- Background Gradient Blob -->
+                            <div
+                                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-emerald-100/50 rounded-full blur-3xl">
+                            </div>
+
+                            <!-- Tilted Base Platform -->
+                            <div class="relative w-48 h-48 bg-white/90 backdrop-blur-md rounded-3xl border border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.1)] flex items-center justify-center transition-transform duration-700 ease-out group-hover:rotate-0"
+                                style="transform: rotateX(20deg) rotateY(-20deg) rotateZ(5deg); transform-style: preserve-3d;">
+                                <!-- Inner grid lines -->
+                                <div class="absolute inset-4 border border-dashed border-zinc-200 rounded-2xl"></div>
+                                <div class="text-center" style="transform: translateZ(20px);">
+                                    <div class="text-xs font-bold text-zinc-300 uppercase tracking-widest mb-1">System
+                                    </div>
+                                    <div class="text-2xl font-black text-zinc-200">READY</div>
+                                </div>
+                            </div>
+
+                            <!-- Floating Elements -->
+                            <!-- 1. Main Icon (Zap) -->
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -mt-16 -ml-12 animate-[float_6s_ease-in-out_infinite]"
+                                style="transform: translateZ(60px);">
+                                <div
+                                    class="w-20 h-20 bg-emerald-500 rounded-2xl shadow-[0_20px_40px_rgba(16,185,129,0.4)] flex items-center justify-center text-white border-t border-white/30 transition-transform group-hover:scale-110 duration-500">
+                                    <i data-lucide="zap" class="w-10 h-10 drop-shadow-md"></i>
+                                </div>
+                            </div>
+
+                            <!-- 2. Secondary Badge (Check) -->
+                            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mt-12 ml-16 animate-[float_5s_ease-in-out_infinite_reverse]"
+                                style="transform: translateZ(40px);">
+                                <div
+                                    class="px-5 py-3 bg-white rounded-xl shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex items-center gap-3 border border-zinc-100 transition-transform group-hover:scale-105 duration-500 delay-75">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                        <i data-lucide="check" class="w-4 h-4"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-bold text-zinc-800">Успешно</div>
+                                        <div class="text-[10px] text-zinc-400">Настроено</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Security -->
+                <div
+                    class="stack-card sticky top-36 mb-12 bg-[#064e3b] rounded-[3rem] p-10 md:p-16 shadow-2xl shadow-emerald-900/40 text-white flex flex-col md:flex-row items-center gap-12 overflow-hidden border border-emerald-800">
+                    <div
+                        class="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none">
+                    </div>
+
+                    <div class="w-full md:w-1/2 relative z-10">
+                        <div
+                            class="w-16 h-16 rounded-2xl bg-emerald-800/50 flex items-center justify-center text-emerald-300 mb-8 font-bold text-2xl border border-emerald-700">
+                            02</div>
+                        <h3 class="text-4xl font-bold text-white mb-6">Безопасность</h3>
+                        <p class="text-lg text-emerald-100/70 leading-relaxed mb-8">
+                            Ваши данные защищены по банковским стандартам. Мы делаем ежедневные резервные копии и
+                            шифруем все соединения.
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3 text-emerald-50 font-medium">
+                                <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i>
+                                Шифрование AES-256
+                            </li>
+                            <li class="flex items-center gap-3 text-emerald-50 font-medium">
+                                <i data-lucide="lock" class="w-5 h-5 text-emerald-400"></i>
+                                Двухфакторная аутентификация
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="w-full md:w-1/2 relative">
+                        <div
+                            class="aspect-square bg-emerald-900/30 rounded-[2rem] border border-emerald-800/50 p-8 relative flex items-center justify-center">
+                            <div class="absolute inset-0 animate-[pulse_4s_infinite]">
+                                <div
+                                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] border border-emerald-500/20 rounded-full">
+                                </div>
+                                <div
+                                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] border border-emerald-500/10 rounded-full">
+                                </div>
+                            </div>
+                            <i data-lucide="shield"
+                                class="w-32 h-32 text-emerald-400 drop-shadow-[0_0_30px_rgba(52,211,153,0.5)]"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Support -->
+                <div
+                    class="stack-card sticky top-40 bg-gradient-to-br from-emerald-50 via-teal-50 to-white rounded-[3rem] p-10 md:p-16 border border-emerald-100 shadow-2xl shadow-emerald-500/10 flex flex-col md:flex-row items-center gap-12 overflow-hidden">
+                    <div class="w-full md:w-1/2 relative z-10">
+                        <div
+                            class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-teal-600 mb-8 font-bold text-2xl shadow-lg shadow-teal-500/10">
+                            03</div>
+                        <h3 class="text-4xl font-bold text-[#1A1A1A] mb-6">Забота</h3>
+                        <p class="text-lg text-zinc-500 leading-relaxed mb-8">
+                            Мы не просто софт, мы — партнеры. Наша служба поддержки всегда на связи, чтобы помочь с
+                            настройкой или ответить на вопросы.
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3 text-zinc-600 font-medium">
+                                <i data-lucide="message-circle" class="w-5 h-5 text-teal-500"></i>
+                                Поддержка в чате
+                            </li>
+                            <li class="flex items-center gap-3 text-zinc-600 font-medium">
+                                <i data-lucide="book-open" class="w-5 h-5 text-teal-500"></i>
+                                Подробная база знаний
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="w-full md:w-1/2 relative">
+                        <div class="aspect-square relative">
+                            <!-- Chat Bubbles Visual -->
+                            <div
+                                class="glass-card absolute top-1/4 left-0 p-4 rounded-xl rounded-bl-sm animate-[float_4s_ease-in-out_infinite] shadow-lg border-teal-100 bg-white/80">
+                                <p class="text-xs font-medium text-zinc-600">Как настроить онлайн-запись?</p>
+                            </div>
+                            <div
+                                class="glass-card absolute top-1/2 right-0 p-4 rounded-xl rounded-br-sm animate-[float_5s_ease-in-out_infinite_reverse] shadow-lg border-emerald-100 bg-emerald-500 text-white">
+                                <p class="text-xs font-medium">Это займет всего 2 минуты! 😉</p>
+                            </div>
+                            <div class="glass-card absolute bottom-1/4 left-10 p-4 rounded-xl rounded-bl-sm animate-[float_6s_ease-in-out_infinite] shadow-lg border-teal-100 bg-white/80"
+                                style="animation-delay: 1s">
+                                <p class="text-xs font-medium text-zinc-600">Спасибо, всё работает!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <!-- Bento Grid (Key Features) - Editorial Style -->
+    <section class="py-24 bg-white" id="features">
+        <div class="max-w-[1200px] mx-auto px-6">
+
+            <!-- Header -->
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+                <div>
+                    <span
+                        class="text-emerald-500 font-mono text-sm font-medium tracking-wider uppercase mb-4 block">Функционал</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-tight"
+                        style="font-family: 'Outfit', sans-serif;">
+                        Всё что нужно<br>в одном месте
+                    </h2>
+                </div>
+                <p class="text-zinc-500 max-w-md text-lg leading-relaxed">
+                    Мощные инструменты для роста вашего бизнеса — без лишней сложности
+                </p>
+            </div>
+
+            <!-- Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <!-- Card 1: Calendar (Hero - Large) -->
+                <div class="lg:col-span-2 lg:row-span-2 group features-card">
+                    <div
+                        class="bg-zinc-50 rounded-3xl p-8 lg:p-10 h-full relative overflow-hidden hover:bg-zinc-100/80 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50">
+
+                        <div class="relative z-10">
+                            <div
+                                class="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full text-xs font-medium text-zinc-600 shadow-sm mb-6">
+                                <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                Самое важное
+                            </div>
+
+                            <h3 class="text-3xl lg:text-4xl font-bold text-[#1A1A1A] mb-4">Умный Календарь</h3>
+                            <p class="text-zinc-500 text-lg mb-8 max-w-lg">
+                                Онлайн-запись клиентов 24/7. Защита от накладок. Гибкое расписание для любого графика
+                                работы.
+                            </p>
+
+                            <!-- Mini Calendar UI -->
+                            <div class="bg-white rounded-2xl p-4 shadow-lg shadow-zinc-200/50 max-w-md">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-sm font-semibold text-zinc-800">Среда, 15 января</span>
+                                    <div class="flex gap-1">
+                                        <span
+                                            class="w-6 h-6 rounded bg-zinc-100 flex items-center justify-center text-xs text-zinc-400">←</span>
+                                        <span
+                                            class="w-6 h-6 rounded bg-zinc-100 flex items-center justify-center text-xs text-zinc-400">→</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs text-zinc-400 w-12">10:00</span>
+                                        <div class="flex-1 bg-emerald-100 p-2 rounded-lg border-l-4 border-emerald-500">
+                                            <div class="text-sm font-medium text-emerald-900">Стрижка + Борода</div>
+                                            <div class="text-xs text-emerald-700">Иван Иванов</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs text-zinc-400 w-12">11:30</span>
+                                        <div class="flex-1 bg-blue-100 p-2 rounded-lg border-l-4 border-blue-500">
+                                            <div class="text-sm font-medium text-blue-900">Маникюр</div>
+                                            <div class="text-xs text-blue-700">Анна Петрова</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs text-zinc-400 w-12">14:00</span>
+                                        <div
+                                            class="flex-1 bg-zinc-100 p-2 rounded-lg border-l-4 border-zinc-300 border-dashed">
+                                            <div class="text-sm font-medium text-zinc-400">Свободно</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Finance -->
+                <div class="group features-card">
+                    <div
+                        class="bg-emerald-600 rounded-3xl p-6 h-full relative overflow-hidden text-white hover:bg-emerald-700 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/30">
+
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-bold text-white mb-2">Финансы</h3>
+                            <p class="text-emerald-100/80 text-sm leading-relaxed mb-6">
+                                Доходы, расходы, налоги — всё под контролем
+                            </p>
+
+                            <!-- Mini Finance UI -->
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-emerald-100">Прибыль</span>
+                                    <span class="text-lg font-bold">₽ 84,200</span>
+                                </div>
+                                <div class="w-full bg-white/20 h-1.5 rounded-full">
+                                    <div class="w-3/4 h-full bg-white rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Notifications -->
+                <div class="group features-card">
+                    <div
+                        class="bg-zinc-50 rounded-3xl p-6 h-full relative overflow-hidden hover:bg-zinc-100/80 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50">
+
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-bold text-[#1A1A1A] mb-2">Уведомления</h3>
+                            <p class="text-zinc-500 text-sm leading-relaxed mb-4">
+                                Telegram, SMS, Email, VK
+                            </p>
+
+                            <!-- Notification badges -->
+                            <div class="flex flex-wrap gap-2">
+                                <span
+                                    class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium">Telegram</span>
+                                <span
+                                    class="px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium">SMS</span>
+                                <span
+                                    class="px-2 py-1 bg-zinc-200 text-zinc-600 rounded-lg text-xs font-medium">Email</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Personal Page -->
+                <div class="lg:col-span-2 group features-card">
+                    <div
+                        class="bg-zinc-900 rounded-3xl p-6 lg:p-8 h-full relative overflow-hidden text-white hover:bg-zinc-800 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-900/30">
+
+                        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center gap-6">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold text-white mb-2">Персональная Страница</h3>
+                                <p class="text-zinc-400 text-sm leading-relaxed mb-4">
+                                    Ваш сайт с портфолио, отзывами и онлайн-записью
+                                </p>
+
+                                <!-- URL Preview -->
+                                <div class="inline-flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    <span class="text-sm text-zinc-300 font-mono">mclient.pro/your-name</span>
+                                </div>
+                            </div>
+
+                            <!-- Mini Page Preview -->
+                            <div class="bg-zinc-800 rounded-xl p-3 w-full lg:w-48 border border-zinc-700">
+                                <div class="w-full h-2 bg-zinc-700 rounded mb-2 w-2/3"></div>
+                                <div class="flex gap-1 mb-2">
+                                    <div class="w-8 h-8 bg-zinc-700 rounded"></div>
+                                    <div class="w-8 h-8 bg-zinc-700 rounded"></div>
+                                    <div class="w-8 h-8 bg-zinc-700 rounded"></div>
+                                </div>
+                                <div
+                                    class="w-full h-6 bg-emerald-600 rounded text-[10px] text-white flex items-center justify-center">
+                                    Записаться</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Clients Database -->
+                <div class="group features-card">
+                    <div
+                        class="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-3xl p-6 h-full relative overflow-hidden border border-emerald-100 hover:from-teal-100 hover:to-emerald-100 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-200/50">
+
+                        <div class="relative z-10">
+                            <h3 class="text-2xl font-bold text-emerald-900 mb-2">База Клиентов</h3>
+                            <p class="text-emerald-700/70 text-sm leading-relaxed mb-4">
+                                История визитов, заметки, аналитика
+                            </p>
+
+                            <!-- Mini clients preview -->
+                            <div class="flex -space-x-2">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 border-2 border-white">
+                                </div>
+                                <div
+                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 border-2 border-white">
+                                </div>
+                                <div
+                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-white">
+                                </div>
+                                <div
+                                    class="w-8 h-8 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-xs font-bold text-emerald-700">
+                                    +42</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+
+
+    <!-- Pricing Section -->
+    <section class="py-24 bg-zinc-50/50 relative overflow-hidden" id="pricing">
+        <div class="max-w-[1200px] mx-auto px-6 relative z-10">
+            <div class="text-center mb-16 fade-up">
+                <div
+                    class="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold shadow-sm">
+                    <span>Тарифы</span>
+                </div>
+                <h2 class="text-4xl font-bold text-[#1A1A1A] tracking-tight mb-6"
+                    style="font-family: 'Outfit', sans-serif;">
+                    Гибкие Тарифы
+                </h2>
+
+                <!-- Toggle -->
+                <div class="flex items-center justify-center gap-4 mt-8">
+                    <span class="text-sm font-medium text-zinc-500" id="billing-monthly">Ежемесячно</span>
+                    <button id="billing-toggle"
+                        class="w-14 h-8 rounded-full bg-zinc-200 relative transition-colors duration-300 focus:outline-none">
+                        <div
+                            class="w-6 h-6 rounded-full bg-white shadow-md absolute top-1 left-1 transition-transform duration-300 transform translate-x-0">
+                        </div>
+                    </button>
+                    <span class="text-sm font-medium text-[#1A1A1A]" id="billing-yearly">Ежегодно <span
+                            class="text-emerald-600 text-xs font-bold ml-1 bg-emerald-100 px-2 py-0.5 rounded-full">-20%</span></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Card 1: Free -->
+                <div
+                    class="fade-up bg-white rounded-[2rem] p-8 border border-zinc-100 shadow-xl shadow-zinc-200/50 flex flex-col relative overflow-hidden group hover:border-emerald-200 transition-colors">
+                    <div class="mb-6">
+                        <div class="text-lg font-bold text-[#1A1A1A] mb-2">Бесплатный</div>
+                        <div class="text-sm text-zinc-500">Легкий старт</div>
+                    </div>
+                    <div class="mb-8">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-[#1A1A1A]">0 ₽</span>
+                            <span class="text-zinc-400">/мес</span>
+                        </div>
+                    </div>
+
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-center gap-3 text-sm text-zinc-600">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            До 30 клиентов
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-zinc-600">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            Базовые функции
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-zinc-600">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            Записи без лимита
+                        </li>
+                    </ul>
+
+                    <a href="#"
+                        class="w-full py-3 rounded-full border border-zinc-200 text-[#1A1A1A] font-bold text-center hover:bg-black hover:text-white hover:border-black transition-colors">
+                        Начать
+                    </a>
+                </div>
+
+                <!-- Card 2: Professional (Popular) -->
+                <div
+                    class="fade-up bg-[#1A1A1A] rounded-[2rem] p-8 border border-zinc-800 shadow-2xl shadow-emerald-900/20 flex flex-col relative overflow-hidden transform md:-translate-y-4 z-10">
+                    <div
+                        class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">
+                        ХИТ</div>
+                    <div class="mb-6">
+                        <div class="text-lg font-bold text-white mb-2">Профессиональный</div>
+                        <div class="text-sm text-zinc-400">Для активных мастеров</div>
+                    </div>
+                    <div class="mb-8">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-5xl font-bold text-white price-value" data-monthly="990"
+                                data-yearly="790">990 ₽</span>
+                            <span class="text-zinc-500">/мес</span>
+                        </div>
+                        <div class="text-xs text-emerald-400 mt-2 h-4 transition-opacity opacity-0 yearly-note">при
+                            оплате за год</div>
+                    </div>
+
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-center gap-3 text-sm text-zinc-300">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            <strong>Неограниченно</strong> клиентов
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-zinc-300">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            Расширенная аналитика
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-zinc-300">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            Telegram Уведомления
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-zinc-300">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center text-white shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            Кастомный брендинг
+                        </li>
+                    </ul>
+
+                    <a href="#"
+                        class="w-full py-3 rounded-full bg-emerald-500 text-white font-bold text-center hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/25">
+                        Попробовать 14 дней
+                    </a>
+                </div>
+
+                <!-- Card 3: Business -->
+                <div
+                    class="fade-up bg-white rounded-[2rem] p-8 border border-zinc-100 shadow-xl shadow-zinc-200/50 flex flex-col relative overflow-hidden group hover:border-emerald-200 transition-colors">
+                    <div class="mb-6">
+                        <div class="text-lg font-bold text-[#1A1A1A] mb-2">Бизнес</div>
+                        <div class="text-sm text-zinc-500">Максимум возможностей</div>
+                    </div>
+                    <div class="mb-8">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-[#1A1A1A] price-value" data-monthly="2490"
+                                data-yearly="1990">2490 ₽</span>
+                            <span class="text-zinc-400">/мес</span>
+                        </div>
+                        <div class="text-xs text-emerald-600 mt-2 h-4 transition-opacity opacity-0 yearly-note">при
+                            оплате за год</div>
+                    </div>
+
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-center gap-3 text-sm text-zinc-600">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                <i data-lucide="plus" class="w-3 h-3"></i>
+                            </div>
+                            Всё из Профессионального
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-zinc-600">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            Персональный менеджер
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-zinc-600">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            API доступ
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-zinc-600">
+                            <div
+                                class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                <i data-lucide="check" class="w-3 h-3"></i>
+                            </div>
+                            Модули без ограничений
+                        </li>
+                    </ul>
+
+                    <a href="#"
+                        class="w-full py-3 rounded-full border border-zinc-200 text-[#1A1A1A] font-bold text-center hover:bg-black hover:text-white hover:border-black transition-colors">
+                        Подключить
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Testimonials Section (Redesigned) -->
+    <!-- Testimonials Section (Simple & Clean) -->
+    <section class="py-24 bg-zinc-50" id="testimonials">
+        <div class="max-w-[1200px] mx-auto px-6">
+
+            <!-- Header -->
+            <div class="text-center mb-16">
+                <span class="text-emerald-600 font-medium text-sm tracking-wider uppercase mb-3 block">Отзывы</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-zinc-900 mb-6 font-sans">
+                    Доверие профессионалов
+                </h2>
+                <p class="text-zinc-500 text-lg max-w-2xl mx-auto">
+                    Тысячи мастеров используют MClient каждый день. Вот что они говорят
+                </p>
+            </div>
+
+            <!-- Simple Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Card 1 -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-zinc-100 flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://ui-avatars.com/api/?name=Анна+К&background=ecfdf5&color=059669"
+                            class="w-12 h-12 rounded-full" alt="Анна">
+                        <div>
+                            <div class="font-bold text-zinc-900">Анна Козлова</div>
+                            <div class="text-xs text-zinc-500">Мастер маникюра</div>
+                        </div>
+                    </div>
+                    <p class="text-zinc-600 leading-relaxed flex-1">
+                        "Идеальный сервис для мастера. Всё просто и понятно. Клиенты записываются сами, а я просто
+                        получаю
+                        уведомления. Очень экономит время!"
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-zinc-100 flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://ui-avatars.com/api/?name=Дмитрий+О&background=f0f9ff&color=0284c7"
+                            class="w-12 h-12 rounded-full" alt="Дмитрий">
+                        <div>
+                            <div class="font-bold text-zinc-900">Дмитрий Орлов</div>
+                            <div class="text-xs text-zinc-500">Барбер</div>
+                        </div>
+                    </div>
+                    <p class="text-zinc-600 leading-relaxed flex-1">
+                        "Искал простую CRM без лишних наворотов. MClient подошла идеально. Особенно радует финансовая
+                        статистика — сразу видно, сколько заработал."
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-zinc-100 flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://ui-avatars.com/api/?name=Елена+В&background=fefce8&color=ca8a04"
+                            class="w-12 h-12 rounded-full" alt="Елена">
+                        <div>
+                            <div class="font-bold text-zinc-900">Елена Волкова</div>
+                            <div class="text-xs text-zinc-500">Косметолог</div>
+                        </div>
+                    </div>
+                    <p class="text-zinc-600 leading-relaxed flex-1">
+                        "Мои клиенты в восторге от онлайн-записи. Говорят, что это очень удобно. А мне нравится, что не
+                        нужно ночью отвечать на сообщения."
+                    </p>
+                </div>
+
+                <!-- Card 4 -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-zinc-100 flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://ui-avatars.com/api/?name=Мария+П&background=fdf4ff&color=c026d3"
+                            class="w-12 h-12 rounded-full" alt="Мария">
+                        <div>
+                            <div class="font-bold text-zinc-900">Мария Петрова</div>
+                            <div class="text-xs text-zinc-500">Визажист</div>
+                        </div>
+                    </div>
+                    <p class="text-zinc-600 leading-relaxed flex-1">
+                        "Перепробовала много разных программ, но остановилась на этой. Интуитивно понятно, красиво и
+                        работает быстро. Техподдержка отвечает мгновенно."
+                    </p>
+                </div>
+
+                <!-- Card 5 -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-zinc-100 flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://ui-avatars.com/api/?name=Алексей+С&background=f5f5f4&color=57534e"
+                            class="w-12 h-12 rounded-full" alt="Алексей">
+                        <div>
+                            <div class="font-bold text-zinc-900">Алексей Смирнов</div>
+                            <div class="text-xs text-zinc-500">Репетитор</div>
+                        </div>
+                    </div>
+                    <p class="text-zinc-600 leading-relaxed flex-1">
+                        "Очень удобно вести расписание занятий. Ученики получают напоминания и не забывают приходить.
+                        Система окупила себя в первый же месяц."
+                    </p>
+                </div>
+
+                <!-- Card 6 -->
+                <div
+                    class="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-zinc-100 flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <img src="https://ui-avatars.com/api/?name=Ольга+Н&background=fff7ed&color=ea580c"
+                            class="w-12 h-12 rounded-full" alt="Ольга">
+                        <div>
+                            <div class="font-bold text-zinc-900">Ольга Новикова</div>
+                            <div class="text-xs text-zinc-500">Стилист</div>
+                        </div>
+                    </div>
+                    <p class="text-zinc-600 leading-relaxed flex-1">
+                        "Нравится, что можно настроить всё под себя. Цвета, услуги, график. Клиентская база теперь в
+                        полном
+                        порядке, ничего не теряется."
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Bottom CTA -->
+            <div class="mt-16 text-center">
+                <a href="#"
+                    class="inline-flex items-center gap-2 group text-sm font-semibold text-zinc-500 hover:text-emerald-600 transition-colors">
+                    Читать все 500+ отзывов
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+
+        </div>
+    </section> <!-- News Section -->
+    <section class="py-24 bg-white" id="news">
+        <div class="max-w-[1200px] mx-auto px-6">
+
+            <!-- Header -->
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+                <div>
+                    <span
+                        class="text-emerald-500 font-mono text-sm font-medium tracking-wider uppercase mb-4 block">Блог</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-tight"
+                        style="font-family: 'Outfit', sans-serif;">
+                        Новости и статьи
+                    </h2>
+                </div>
+                <a href="#"
+                    class="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors">
+                    Все статьи
+                    <span>→</span>
+                </a>
+            </div>
+
+            <!-- News Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Article 1 -->
+                <article class="group">
+                    <div class="bg-zinc-100 rounded-2xl aspect-video mb-4 overflow-hidden">
+                        <div
+                            class="w-full h-full bg-gradient-to-br from-emerald-200 to-teal-300 group-hover:scale-105 transition-transform duration-500">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-zinc-500 mb-2">
+                        <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded font-medium">Советы</span>
+                        <span>15 января 2026</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-[#1A1A1A] mb-2 group-hover:text-emerald-600 transition-colors">
+                        Как увеличить поток клиентов с помощью онлайн-записи
+                    </h3>
+                    <p class="text-sm text-zinc-500 leading-relaxed">
+                        5 проверенных способов привлечь больше клиентов через персональную страницу...
+                    </p>
+                </article>
+
+                <!-- Article 2 -->
+                <article class="group">
+                    <div class="bg-zinc-100 rounded-2xl aspect-video mb-4 overflow-hidden">
+                        <div
+                            class="w-full h-full bg-gradient-to-br from-blue-200 to-indigo-300 group-hover:scale-105 transition-transform duration-500">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-zinc-500 mb-2">
+                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium">Обновление</span>
+                        <span>10 января 2026</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-[#1A1A1A] mb-2 group-hover:text-emerald-600 transition-colors">
+                        Новый модуль аналитики: отслеживайте KPI в реальном времени
+                    </h3>
+                    <p class="text-sm text-zinc-500 leading-relaxed">
+                        Представляем расширенную аналитику для Pro и Business тарифов...
+                    </p>
+                </article>
+
+                <!-- Article 3 -->
+                <article class="group">
+                    <div class="bg-zinc-100 rounded-2xl aspect-video mb-4 overflow-hidden">
+                        <div
+                            class="w-full h-full bg-gradient-to-br from-amber-200 to-orange-300 group-hover:scale-105 transition-transform duration-500">
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-zinc-500 mb-2">
+                        <span class="px-2 py-1 bg-amber-100 text-amber-700 rounded font-medium">Кейс</span>
+                        <span>5 января 2026</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-[#1A1A1A] mb-2 group-hover:text-emerald-600 transition-colors">
+                        История успеха: как барбершоп увеличил выручку на 60%
+                    </h3>
+                    <p class="text-sm text-zinc-500 leading-relaxed">
+                        Реальный кейс внедрения MClient в сети барбершопов «BroStyle»...
+                    </p>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section (Redesigned) -->
+    <section class="py-24 bg-gradient-to-b from-zinc-50 to-white relative" id="faq">
+        <div class="max-w-[1000px] mx-auto px-6">
+
+            <!-- Header -->
+            <div class="text-center mb-16">
+                <span
+                    class="text-emerald-500 font-mono text-sm font-medium tracking-wider uppercase mb-4 block">Поддержка</span>
+                <h2 class="text-4xl md:text-5xl font-bold text-[#1A1A1A] tracking-tight mb-4"
+                    style="font-family: 'Outfit', sans-serif;">
+                    Частые вопросы
+                </h2>
+                <p class="text-zinc-500 text-lg">Не нашли ответ? <a href="#"
+                        class="text-emerald-600 font-medium hover:underline">Напишите нам</a></p>
+            </div>
+
+            <!-- FAQ Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- FAQ Item 1 -->
+                <details
+                    class="faq-item bg-white rounded-2xl overflow-hidden group border border-zinc-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <h3 class="font-bold text-[#1A1A1A] pr-4">Могу ли я попробовать бесплатно?</h3>
+                        <div
+                            class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 group-open:bg-emerald-500 group-open:text-white transition-all flex-shrink-0 group-open:rotate-45">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </div>
+                    </summary>
+                    <div class="px-6 pb-6">
+                        <p class="text-zinc-500 leading-relaxed">Да, у нас есть пробный период 14 дней на всех тарифах,
+                            а также полностью бесплатный тариф для начинающих мастеров.</p>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 2 -->
+                <details
+                    class="faq-item bg-white rounded-2xl overflow-hidden group border border-zinc-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <h3 class="font-bold text-[#1A1A1A] pr-4">Нужно ли устанавливать программу?</h3>
+                        <div
+                            class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 group-open:bg-emerald-500 group-open:text-white transition-all flex-shrink-0 group-open:rotate-45">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </div>
+                    </summary>
+                    <div class="px-6 pb-6">
+                        <p class="text-zinc-500 leading-relaxed">Нет, MClient работает в облаке. Заходите с любого
+                            устройства — телефона, планшета или ноутбука — через браузер.</p>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 3 -->
+                <details
+                    class="faq-item bg-white rounded-2xl overflow-hidden group border border-zinc-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <h3 class="font-bold text-[#1A1A1A] pr-4">Как настроить онлайн-запись?</h3>
+                        <div
+                            class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 group-open:bg-emerald-500 group-open:text-white transition-all flex-shrink-0 group-open:rotate-45">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </div>
+                    </summary>
+                    <div class="px-6 pb-6">
+                        <p class="text-zinc-500 leading-relaxed">Пошаговый мастер настройки поможет за 2 минуты создать
+                            профиль, добавить услуги и получить уникальную ссылку для записи.</p>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 4 -->
+                <details
+                    class="faq-item bg-white rounded-2xl overflow-hidden group border border-zinc-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <h3 class="font-bold text-[#1A1A1A] pr-4">Могу ли я отменить подписку?</h3>
+                        <div
+                            class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 group-open:bg-emerald-500 group-open:text-white transition-all flex-shrink-0 group-open:rotate-45">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </div>
+                    </summary>
+                    <div class="px-6 pb-6">
+                        <p class="text-zinc-500 leading-relaxed">Да, отменить подписку можно в любой момент. Средства за
+                            неиспользованный период возвращаются на карту.</p>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 5 -->
+                <details
+                    class="faq-item bg-white rounded-2xl overflow-hidden group border border-zinc-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <h3 class="font-bold text-[#1A1A1A] pr-4">Как работают уведомления клиентам?</h3>
+                        <div
+                            class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 group-open:bg-emerald-500 group-open:text-white transition-all flex-shrink-0 group-open:rotate-45">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </div>
+                    </summary>
+                    <div class="px-6 pb-6">
+                        <p class="text-zinc-500 leading-relaxed">Система автоматически отправляет напоминания через
+                            Telegram, SMS или Email за 24 часа и за 2 часа до записи.</p>
+                    </div>
+                </details>
+
+                <!-- FAQ Item 6 -->
+                <details
+                    class="faq-item bg-white rounded-2xl overflow-hidden group border border-zinc-100 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-500/5 transition-all duration-300">
+                    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+                        <h3 class="font-bold text-[#1A1A1A] pr-4">Есть ли мобильное приложение?</h3>
+                        <div
+                            class="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 group-open:bg-emerald-500 group-open:text-white transition-all flex-shrink-0 group-open:rotate-45">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                        </div>
+                    </summary>
+                    <div class="px-6 pb-6">
+                        <p class="text-zinc-500 leading-relaxed">Веб-версия адаптирована для мобильных устройств.
+                            Нативное приложение для iOS и Android — в разработке и выйдет в 2026 году.</p>
+                    </div>
+                </details>
+
+            </div>
+
+            <!-- CTA -->
+            <div class="text-center mt-12">
+                <p class="text-zinc-500 mb-4">Остались вопросы?</p>
+                <a href="#"
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white font-semibold rounded-full hover:bg-emerald-700 transition-colors">
+                    Написать в поддержку
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                        </path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer class="pt-32 pb-12 bg-white relative overflow-hidden">
+        <!-- Bottom Mesh Gradient -->
+        <div class="absolute bottom-0 left-0 w-full h-[600px] z-0 pointer-events-none">
+            <div class="absolute bottom-0 left-0 w-full h-full opacity-30"
+                style="background: radial-gradient(circle at 50% 100%, rgba(52, 211, 153, 0.4) 0%, rgba(20, 184, 166, 0.2) 30%, rgba(255, 255, 255, 0) 70%); filter: blur(60px);">
+            </div>
+        </div>
+
+        <!-- Giant Background Text -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden pointer-events-none opacity-[0.03]">
+            <span
+                class="text-[25vw] font-black text-black leading-none block text-center transform translate-y-[20%] tracking-tighter">
+                MCLIENT
+            </span>
+        </div>
+
+        <div class="max-w-[1200px] mx-auto px-6 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-20">
+                <div class="col-span-12 md:col-span-4">
+                    <h3 class="text-2xl font-bold text-[#1A1A1A] mb-6">Готовы<br>Автоматизировать?</h3>
+                    <a href="#"
+                        class="px-6 py-2 bg-black text-white text-xs font-bold rounded-full shadow-lg inline-flex items-center gap-2 hover:bg-emerald-600 transition-colors">
+                        Регистрация <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    </a>
+
+                    <div class="flex items-center gap-2 cursor-pointer group relative mt-8">
+                        <!-- M Logo: Professional Geometry -->
+                        <div class="w-10 h-10 relative flex items-center justify-center -translate-y-[2.5px]">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="text-emerald-500 group-hover:scale-110 transition-transform duration-300 relative z-10">
+                                <path d="M4 20V8L12 16L20 8V20" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round"></path>
+                                <path d="M4 20H20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                </path>
+                            </svg>
+                            <!-- Glow behind logo -->
+                            <div
+                                class="absolute inset-0 bg-emerald-500/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            </div>
+                        </div>
+                        <span
+                            class="text-xl font-bold tracking-tight text-[#1A1A1A] transition-colors group-hover:text-emerald-600">MClient</span>
+                    </div>
+                </div>
+
+                <div class="col-span-6 md:col-span-2">
+                    <h4 class="font-bold text-[#1A1A1A] mb-4 text-sm">Продукт</h4>
+                    <ul class="space-y-2 text-xs text-zinc-500 font-medium">
+                        <li><a href="#" class="hover:text-black">Возможности</a></li>
+                        <li><a href="#" class="hover:text-black">Тарифы</a></li>
+                        <li><a href="#" class="hover:text-black">Безопасность</a></li>
+                    </ul>
+                </div>
+                <div class="col-span-6 md:col-span-2">
+                    <h4 class="font-bold text-[#1A1A1A] mb-4 text-sm">Поддержка</h4>
+                    <ul class="space-y-2 text-xs text-zinc-500 font-medium">
+                        <li><a href="#" class="hover:text-black">База Знаний</a></li>
+                        <li><a href="#" class="hover:text-black">Инструкции</a></li>
+                        <li><a href="#" class="hover:text-black">Контакты</a></li>
+                    </ul>
+                </div>
+                <div class="col-span-6 md:col-span-2">
+                    <h4 class="font-bold text-[#1A1A1A] mb-4 text-sm">Правовая Инфо</h4>
+                    <ul class="space-y-2 text-xs text-zinc-500 font-medium">
+                        <li><a href="#" class="hover:text-black">Конфиденциальность</a></li>
+                        <li><a href="#" class="hover:text-black">Условия</a></li>
+                        <li><a href="#" class="hover:text-black">Оферта</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-black/5">
+                <div class="flex gap-4 mb-4 md:mb-0">
+                    <span class="text-[10px] text-zinc-400">Сделано с любовью для мастеров</span>
+                </div>
+
+                <div class="flex gap-2">
+                    <a href="#"
+                        class="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-400 hover:bg-black hover:text-white transition-colors hover:border-black"><i
+                            data-lucide="send" class="w-3 h-3"></i></a>
+                    <a href="#"
+                        class="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-400 hover:bg-black hover:text-white transition-colors hover:border-black"><i
+                            data-lucide="instagram" class="w-3 h-3"></i></a>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-8 opacity-40 text-[10px] text-zinc-500">
+                <div>© 2024 MClient Inc.</div>
+                <div>Все права защищены</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Pricing Toggle Script
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('billing-toggle');
+            const toggleCircle = toggleBtn.querySelector('div');
+            const priceValues = document.querySelectorAll('.price-value');
+            const yearlyNotes = document.querySelectorAll('.yearly-note');
+            let isYearly = false;
+
+            toggleBtn.addEventListener('click', () => {
+                isYearly = !isYearly;
+
+                // Animate Toggle
+                if (isYearly) {
+                    toggleBtn.classList.remove('bg-zinc-200');
+                    toggleBtn.classList.add('bg-emerald-500');
+                    toggleCircle.classList.add('translate-x-6');
+                } else {
+                    toggleBtn.classList.add('bg-zinc-200');
+                    toggleBtn.classList.remove('bg-emerald-500');
+                    toggleCircle.classList.remove('translate-x-6');
+                }
+
+                // Update Prices with Animation
+                priceValues.forEach(el => {
+                    const monthlyPrice = el.getAttribute('data-monthly');
+                    const yearlyPrice = el.getAttribute('data-yearly');
+
+                    // Simple fade effect
+                    el.style.opacity = '0';
+                    setTimeout(() => {
+                        el.textContent = (isYearly ? yearlyPrice : monthlyPrice) + ' ₽';
+                        el.style.opacity = '1';
+                    }, 150);
+                });
+
+                // Show/Hide Yearly Note
+                yearlyNotes.forEach(note => {
+                    note.style.opacity = isYearly ? '1' : '0';
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

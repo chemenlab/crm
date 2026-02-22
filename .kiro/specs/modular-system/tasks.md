@@ -1,0 +1,334 @@
+# Implementation Plan: Modular System
+
+## Overview
+
+Реализация модульной системы для MasterPlan с полным функционалом покупки модулей, статистикой и управлением в админке. Все frontend компоненты на shadcn/ui. Технологии: Laravel (PHP), React + TypeScript, Inertia.js.
+
+## Tasks
+
+- [x] 1. Создание базовой инфраструктуры модулей
+  - [x] 1.1 Создать миграции для таблиц модульной системы
+    - Таблицы: modules, user_modules, module_purchases, module_settings, module_global_settings, module_grants, module_usage_stats, module_error_logs
+    - _Requirements: 6.1, 6.3, 9.2, 10.2_
+  - [x] 1.2 Создать модели Eloquent
+    - Module, UserModule, ModulePurchase, ModuleSetting, ModuleGlobalSetting, ModuleGrant, ModuleUsageStat, ModuleErrorLog
+    - Связи между моделями
+    - _Requirements: 6.1_
+  - [x] 1.3 Создать структуру директорий для модулей
+    - `app/Modules/` — директория для модулей
+    - `resources/js/modules/` — frontend модулей
+    - _Requirements: 1.1_
+
+- [x] 2. Реализация ядра модульной системы (Backend)
+  - [x] 2.1 Создать ModuleManifest DTO и валидатор
+    - Парсинг module.json
+    - Валидация обязательных полей
+    - _Requirements: 1.2, 1.3, 1.4_
+  - [ ]* 2.2 Написать property test для валидации манифеста
+    - **Property 2: Module Manifest Validation**
+    - **Validates: Requirements 1.3, 1.4**
+  - [x] 2.3 Создать ModuleRegistry (Singleton)
+    - Метод discover() для сканирования директории
+    - Кэширование списка модулей
+    - _Requirements: 1.1, 1.2_
+  - [ ]* 2.4 Написать property test для обнаружения модулей
+    - **Property 1: Module Discovery Completeness**
+    - **Validates: Requirements 1.1, 1.2**
+  - [x] 2.5 Создать ModuleLoader
+    - Загрузка routes, migrations, service providers
+    - Выгрузка модуля
+    - _Requirements: 4.1, 6.2_
+  - [x] 2.6 Создать HookManager
+    - Регистрация хуков от модулей
+    - Выполнение хуков с контекстом
+    - Приоритеты хуков
+    - _Requirements: 3.1, 3.2, 3.3_
+  - [ ]* 2.7 Написать property test для системы хуков
+    - **Property 5: Hook Execution for Active Modules Only**
+    - **Validates: Requirements 3.2, 3.3, 7.4**
+  - [x] 2.8 Создать ModuleEventDispatcher
+    - Публикация событий
+    - Подписка модулей на события
+    - _Requirements: 12.1, 12.2, 12.3, 12.4_
+  - [ ]* 2.9 Написать property test для событий
+    - **Property 10: Event Propagation**
+    - **Validates: Requirements 12.1, 12.2, 12.4**
+
+- [x] 3. Checkpoint - Проверка ядра модульной системы
+  - Убедиться что все тесты проходят
+  - Проверить что модули обнаруживаются
+  - Спросить пользователя если есть вопросы
+
+- [ ] 4. Сервисы управления модулями
+  - [x] 4.1 Создать UserModuleService
+    - enable/disable модулей
+    - Проверка доступа (подписка, покупка, грант)
+    - Выполнение миграций при первом включении
+    - _Requirements: 2.1, 2.2, 2.3, 2.5, 5.1, 5.2_
+  - [ ]* 4.2 Написать property test для активации модулей
+    - **Property 3: Module Activation Persistence**
+    - **Validates: Requirements 2.2, 2.5**
+  - [ ]* 4.3 Написать property test для сохранения данных при отключении
+    - **Property 4: Module Deactivation Data Preservation**
+    - **Validates: Requirements 2.3, 6.4**
+  - [x] 4.4 Создать ModuleSettingsService
+    - Сохранение и чтение настроек модуля
+    - Валидация по схеме из манифеста
+    - _Requirements: 6.3_
+  - [ ]* 4.5 Написать property test для настроек
+    - **Property 9: Settings Storage Round-Trip**
+    - **Validates: Requirements 6.3**
+
+- [x] 5. Middleware и маршрутизация модулей
+  - [x] 5.1 Создать ModuleServiceProvider
+    - Автозагрузка активных модулей
+    - Регистрация routes с префиксами
+    - _Requirements: 4.1, 4.2, 4.3_
+  - [ ]* 5.2 Написать property test для префиксов маршрутов
+    - **Property 6: Route Prefix Consistency**
+    - **Validates: Requirements 4.2, 4.3**
+  - [x] 5.3 Создать middleware CheckModuleActive
+    - Проверка что модуль включён для пользователя
+    - Возврат 404 для отключённых модулей
+    - _Requirements: 4.4, 5.1, 5.4_
+  - [ ]* 5.4 Написать property test для контроля доступа к маршрутам
+    - **Property 7: Route Access Control**
+    - **Validates: Requirements 4.4, 5.1**
+  - [x] 5.5 Создать middleware CheckModulePermission
+    - Проверка permissions модуля
+    - Проверка тарифного плана
+    - _Requirements: 5.2, 5.3_
+  - [ ]* 5.6 Написать property test для проверки прав
+    - **Property 8: Permission and Subscription Enforcement**
+    - **Validates: Requirements 5.2, 5.3, 9.3**
+
+- [x] 6. Checkpoint - Проверка сервисов и middleware
+  - Убедиться что все тесты проходят
+  - Проверить что модули включаются/отключаются
+  - Спросить пользователя если есть вопросы
+
+- [x] 7. Система покупки модулей (Backend)
+  - [x] 7.1 Создать ModulePurchaseService
+    - Создание платежа через ЮKassa
+    - Обработка webhook
+    - Активация модуля после оплаты
+    - _Requirements: 9.4, 9.5, 9.6_
+  - [ ]* 7.2 Написать property test для покупки
+    - **Property 12: Purchase Flow Integrity**
+    - **Validates: Requirements 9.5, 9.6**
+  - [x] 7.3 Реализовать подписку на модули
+    - Автопродление через ЮKassa
+    - Отмена подписки
+    - Уведомление об истечении
+    - _Requirements: 9.7, 9.9_
+  - [ ]* 7.4 Написать property test для подписок
+    - **Property 13: Subscription Expiration Enforcement**
+    - **Validates: Requirements 9.7, 9.9**
+  - [x] 7.5 Создать команду для проверки истекших подписок
+    - Artisan command для cron
+    - Отключение модулей с истёкшей подпиской
+    - Отправка уведомлений
+    - _Requirements: 9.9_
+  - [x] 7.6 Создать ModulePurchaseController
+    - API endpoints для покупки
+    - Webhook endpoint для ЮKassa
+    - История покупок
+    - _Requirements: 9.4, 9.8_
+
+- [x] 8. Статистика модулей (Backend)
+  - [x] 8.1 Создать ModuleStatsService
+    - Общая статистика
+    - Статистика по модулю
+    - Топ модулей
+    - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
+  - [ ]* 8.2 Написать property test для статистики
+    - **Property 14: Admin Stats Accuracy**
+    - **Validates: Requirements 10.2, 10.3**
+  - [x] 8.3 Создать команду агрегации статистики
+    - Artisan command для ежедневного cron
+    - Подсчёт установок, активных пользователей, дохода
+    - _Requirements: 10.2_
+
+- [x] 9. Управление модулями в админке (Backend)
+  - [x] 9.1 Создать ModuleAdminService
+    - Обновление настроек модуля
+    - Глобальное включение/отключение
+    - Выдача бесплатного доступа
+    - _Requirements: 11.1, 11.2, 11.3, 11.5_
+  - [ ]* 9.2 Написать property test для глобального контроля
+    - **Property 15: Admin Module Control**
+    - **Validates: Requirements 11.3, 11.4**
+  - [ ]* 9.3 Написать property test для грантов
+    - **Property 16: Free Grant Access**
+    - **Validates: Requirements 11.5**
+  - [x] 9.4 Создать AdminModuleController
+    - CRUD для модулей
+    - Статистика
+    - Логи ошибок
+    - _Requirements: 11.1, 11.2, 11.6_
+
+- [x] 10. Checkpoint - Проверка backend
+  - Убедиться что все тесты проходят
+  - Проверить API endpoints
+  - Спросить пользователя если есть вопросы
+
+- [x] 11. Frontend инфраструктура модулей
+  - [x] 11.1 Создать ModuleContext и useModules hook
+    - Загрузка списка модулей
+    - Проверка активности
+    - Методы enable/disable/purchase
+    - _Requirements: 7.3_
+  - [x] 11.2 Создать HookRenderer компонент
+    - Рендеринг компонентов модулей в точках расширения
+    - Передача контекста
+    - _Requirements: 7.2, 7.4_
+  - [x] 11.3 Создать ModuleRoute компонент
+    - Обёртка для маршрутов модуля
+    - Проверка активности
+    - _Requirements: 7.2_
+  - [x] 11.4 Интегрировать хуки в существующие компоненты
+    - Sidebar (sidebar.menu)
+    - Dashboard (dashboard.widgets)
+    - ClientCard (client.card.tabs)
+    - Settings (settings.sections)
+    - _Requirements: 3.1_
+
+- [x] 12. Каталог приложений (Frontend)
+  - [x] 12.1 Создать страницу каталога приложений
+    - Список модулей с фильтрацией
+    - Группировка по категориям (shadcn Tabs)
+    - Поиск (shadcn Input)
+    - _Requirements: 8.1, 8.3_
+  - [ ]* 12.2 Написать property test для группировки
+    - **Property 11: Catalog Grouping Consistency**
+    - **Validates: Requirements 8.2, 8.3**
+  - [x] 12.3 Создать ModuleCard компонент
+    - Карточка модуля (shadcn Card)
+    - Статус: free/pro/installed (shadcn Badge)
+    - Кнопки действий (shadcn Button)
+    - _Requirements: 8.2_
+  - [x] 12.4 Создать страницу детальной информации о модуле
+    - Полное описание
+    - Скриншоты
+    - Отзывы (если есть)
+    - _Requirements: 8.4_
+
+- [x] 13. Покупка модулей (Frontend)
+  - [x] 13.1 Создать PurchaseDialog компонент
+    - Модальное окно подтверждения (shadcn Dialog)
+    - Выбор периода подписки (shadcn RadioGroup)
+    - Отображение цены
+    - _Requirements: 9.4_
+  - [x] 13.2 Создать страницу истории покупок
+    - Таблица покупок (shadcn Table)
+    - Статус платежа (shadcn Badge)
+    - Отмена подписки
+    - _Requirements: 9.8_
+  - [x] 13.3 Создать страницу успешной покупки
+    - Подтверждение оплаты
+    - Кнопка перехода к модулю
+    - _Requirements: 9.6_
+  - [x] 13.4 Интегрировать уведомления
+    - Toast при успешной покупке (shadcn Toast)
+    - Toast при ошибке
+    - _Requirements: 9.6_
+
+- [x] 14. Настройки модулей (Frontend)
+  - [x] 14.1 Создать ModuleSettings компонент
+    - Динамическая форма из схемы (shadcn Form)
+    - Поддержка разных типов полей
+    - Сохранение настроек
+    - _Requirements: 6.3_
+  - [x] 14.2 Создать страницу "Мои приложения"
+    - Список установленных модулей
+    - Быстрые действия (настройки, отключить)
+    - _Requirements: 2.1_
+
+- [x] 15. Checkpoint - Проверка frontend пользователя
+  - Убедиться что каталог работает
+  - Проверить покупку модуля
+  - Спросить пользователя если есть вопросы
+
+- [x] 16. Админка - Статистика модулей (Frontend)
+  - [x] 16.1 Создать страницу статистики модулей
+    - Общие метрики (shadcn Card)
+    - Графики (recharts)
+    - Фильтры по периоду (shadcn Select)
+    - _Requirements: 10.1, 10.2, 10.3_
+  - [x] 16.2 Создать виджет топ модулей для дашборда админки
+    - Топ-5 по установкам
+    - Топ-5 по доходу
+    - _Requirements: 10.5_
+  - [x] 16.3 Создать страницу детальной статистики модуля
+    - График установок
+    - Список пользователей (shadcn Table)
+    - История покупок
+    - _Requirements: 10.4_
+
+- [x] 17. Админка - Управление модулями (Frontend)
+  - [x] 17.1 Создать страницу списка модулей
+    - Таблица модулей (shadcn Table)
+    - Переключатель статуса (shadcn Switch)
+    - Действия (shadcn DropdownMenu)
+    - _Requirements: 11.1_
+  - [x] 17.2 Создать форму редактирования модуля
+    - Sheet или Dialog (shadcn)
+    - Редактирование цены, описания
+    - Загрузка скриншотов
+    - _Requirements: 11.2_
+  - [x] 17.3 Создать диалог выдачи бесплатного доступа
+    - Поиск пользователя (shadcn Command)
+    - Выбор срока (shadcn DatePicker)
+    - Причина
+    - _Requirements: 11.5_
+  - [x] 17.4 Создать страницу логов ошибок модулей
+    - Таблица ошибок (shadcn Table)
+    - Фильтры
+    - Раскрытие stack trace (shadcn Collapsible)
+    - _Requirements: 11.6_
+
+- [x] 18. Создание примера модуля
+  - [x] 18.1 Создать модуль "Отзывы" как пример
+    - module.json с полной конфигурацией
+    - Модель Review
+    - Контроллеры и маршруты
+    - _Requirements: 1.4_
+  - [x] 18.2 Реализовать хуки модуля "Отзывы"
+    - Пункт в меню
+    - Вкладка в карточке клиента
+    - Секция на публичной странице
+    - _Requirements: 3.1_
+  - [x] 18.3 Создать frontend для модуля "Отзывы"
+    - Страница списка отзывов
+    - Компоненты для хуков
+    - Настройки модуля
+    - _Requirements: 7.1, 7.2_
+
+- [x] 19. Финальная интеграция и тестирование
+  - [x] 19.1 Интегрировать модульную систему в существующий код
+    - Добавить HookRenderer в нужные места
+    - Обновить навигацию
+    - _Requirements: 3.1_
+  - [x] 19.2 Добавить пункт "Приложения" в меню
+    - Ссылка на каталог
+    - Счётчик установленных модулей
+    - _Requirements: 2.1_
+  - [x] 19.3 Настроить cron задачи
+    - Проверка истекших подписок
+    - Агрегация статистики
+    - Очистка старых логов
+    - _Requirements: 9.9, 10.2_
+
+- [x] 20. Final Checkpoint - Финальная проверка
+  - Убедиться что все тесты проходят
+  - Проверить полный цикл: установка → покупка → использование → отключение
+  - Проверить админку
+  - Спросить пользователя если есть вопросы
+
+## Notes
+
+- Задачи с `*` являются опциональными (property-based тесты)
+- Все frontend компоненты используют shadcn/ui
+- Интеграция с ЮKassa использует существующий PaymentService
+- Модуль "Отзывы" служит примером для создания других модулей
+- Checkpoints позволяют проверить работоспособность на каждом этапе
