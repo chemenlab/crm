@@ -1,7 +1,7 @@
 # =============================================================================
 # Stage 1: Builder (Dependencies & Build Frontend)
 # =============================================================================
-FROM php:8.3-fpm-alpine AS builder
+FROM php:8.4-fpm-alpine AS builder
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -24,7 +24,8 @@ RUN apk add --no-cache \
         zip \
         bcmath \
         intl \
-        opcache
+        opcache \
+        exif
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -59,7 +60,7 @@ RUN rm -rf node_modules tests
 # =============================================================================
 # Stage 2: Production Image
 # =============================================================================
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Install runtime dependencies and build dependencies
 RUN apk add --no-cache \
@@ -91,6 +92,7 @@ RUN apk add --no-cache \
         bcmath \
         intl \
         opcache \
+        exif \
     # Remove build dependencies to keep image small
     && apk del .build-deps
 
