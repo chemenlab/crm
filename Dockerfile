@@ -48,8 +48,8 @@ RUN npm ci
 # Copy application code
 COPY . .
 
-# Complete composer autoload
-RUN composer dump-autoload --no-dev --optimize
+# Complete composer autoload (skip scripts to avoid Laravel boot during build)
+RUN composer dump-autoload --no-dev --optimize --no-scripts
 
 # Build frontend assets
 RUN npm run build
