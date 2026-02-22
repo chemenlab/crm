@@ -28,9 +28,7 @@ RUN apk add --no-cache \
         bcmath \
         intl \
         opcache \
-        exif \
-    && pecl install redis \
-    && docker-php-ext-enable redis
+        exif
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
