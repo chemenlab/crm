@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('promo_code_usages', function (Blueprint $table) {
@@ -13,12 +12,12 @@ return new class extends Migration
             $table->foreignId('promo_code_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('subscription_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('payment_id')->nullable()->constrained()->onDelete('set null');
-            
+            $table->foreignId('payment_id')->nullable()->constrained('subscription_payments')->onDelete('set null');
+
             $table->decimal('discount_amount', 10, 2)->default(0);
-            
+
             $table->timestamps();
-            
+
             $table->index(['promo_code_id', 'user_id']);
             $table->index('user_id');
         });
