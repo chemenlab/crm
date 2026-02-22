@@ -61,7 +61,7 @@ RUN rm -rf node_modules tests
 # =============================================================================
 FROM php:8.3-fpm-alpine
 
-# Install runtime dependencies
+# Install runtime dependencies and build dependencies
 RUN apk add --no-cache \
     nginx \
     supervisor \
@@ -73,6 +73,16 @@ RUN apk add --no-cache \
     icu-libs \
     dcron \
     busybox-suid \
+    # Build dependencies (will be removed after compilation)
+    && apk add --no-cache --virtual .build-deps \
+    $PHPIZE_DEPS \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
+    icu-dev \
+    zlib-dev \
+    # Configure and install PHP extensions
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
@@ -80,7 +90,9 @@ RUN apk add --no-cache \
         zip \
         bcmath \
         intl \
-        opcache
+        opcache \
+    # Remove build dependencies to keep image small
+    && apk del .build-deps
 
 # Create www user
 RUN addgroup -g 1000 www && \
