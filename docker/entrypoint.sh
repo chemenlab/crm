@@ -313,13 +313,14 @@ echo "  [DEBUG] Running config:clear..."
 php artisan config:clear 2>&1 || echo "  ⚠ config:clear failed (see above)"
 
 # Run migration with env overrides as extra safety
-echo "  [DEBUG] Starting migration..."
+echo "  Starting migration..."
 CACHE_STORE=array SESSION_DRIVER=array QUEUE_CONNECTION=sync \
     php -d display_errors=1 -d error_reporting=E_ALL \
-    artisan migrate --force --no-interaction -v 2>&1 | tee /tmp/migrate_output.log
-MIGRATE_EXIT=${PIPESTATUS[0]}
+    artisan migrate --force --no-interaction -v > /tmp/migrate_output.log 2>&1
+MIGRATE_EXIT=$?
+cat /tmp/migrate_output.log
 
-echo "  [DEBUG] Migration exit code: $MIGRATE_EXIT"
+echo "  Migration exit code: $MIGRATE_EXIT"
 
 # Restore original driver values after migration
 echo "  Restoring drivers: CACHE=$ORIG_CACHE_STORE SESSION=$ORIG_SESSION_DRIVER QUEUE=$ORIG_QUEUE_CONNECTION"

@@ -109,32 +109,43 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         // Log all exceptions with context
-        // IMPORTANT: Use try-catch for auth()/request() — they may not be available
-        // during early boot or in CLI context (e.g., migrations), which would cause
-        // a cascading fatal error that masks the original exception.
+        // IMPORTANT: The entire body is wrapped in try-catch because during early boot
+        // or CLI context, facades (Log::), auth(), request() may not be available.
+        // A failure here would mask the original exception with exit 255.
         $exceptions->report(function (\Throwable $e) {
             try {
-                $userId = auth()->id();
-            } catch (\Throwable) {
                 $userId = null;
-            }
+                try {
+                    $userId = auth()->id();
+                } catch (\Throwable) {
+                }
 
-            try {
-                $url = request()->fullUrl();
-                $method = request()->method();
-            } catch (\Throwable) {
                 $url = php_sapi_name() === 'cli' ? 'CLI' : 'unknown';
                 $method = php_sapi_name() === 'cli' ? 'CLI' : 'unknown';
-            }
+                try {
+                    $url = request()->fullUrl();
+                    $method = request()->method();
+                } catch (\Throwable) {
+                }
 
-            \Illuminate\Support\Facades\Log::error('Exception occurred', [
-                'exception' => get_class($e),
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'user_id' => $userId,
-                'url' => $url,
-                'method' => $method,
-            ]);
+                \Illuminate\Support\Facades\Log::error('Exception occurred', [
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'user_id' => $userId,
+                    'url' => $url,
+                    'method' => $method,
+                ]);
+            } catch (\Throwable) {
+                // Facades not available (early boot) — use PHP built-in logging
+                error_log(sprintf(
+                    "[Laravel] %s: %s in %s:%d",
+                    get_class($e),
+                    $e->getMessage(),
+                    $e->getFile(),
+                    $e->getLine()
+                ));
+            }
         });
     })->create();
