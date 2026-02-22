@@ -98,17 +98,18 @@ echo "✓ .env file generated"
 # =============================================================================
 # 2. Wait for database to be ready
 # =============================================================================
+DB_PORT="${DB_PORT:-3306}"
 echo "[2/7] Waiting for database connection..."
-echo "  DB_HOST=${DB_HOST} DB_PORT=${DB_PORT:-5432} DB_DATABASE=${DB_DATABASE} DB_USERNAME=${DB_USERNAME}"
+echo "  DB_CONNECTION=${DB_CONNECTION} DB_HOST=${DB_HOST} DB_PORT=${DB_PORT} DB_DATABASE=${DB_DATABASE}"
 
 MAX_RETRIES=30
 RETRY_COUNT=0
 
-# First check TCP connectivity to avoid waiting 30x on DNS/network issues
-echo "Checking TCP connectivity to ${DB_HOST}:${DB_PORT:-5432}..."
+# TCP check
+echo "Checking TCP connectivity to ${DB_HOST}:${DB_PORT}..."
 TCP_OK=0
 for i in $(seq 1 10); do
-    if nc -z -w3 "${DB_HOST}" "${DB_PORT:-5432}" 2>/dev/null; then
+    if nc -z -w3 "${DB_HOST}" "${DB_PORT}" 2>/dev/null; then
         TCP_OK=1
         break
     fi
@@ -117,15 +118,18 @@ for i in $(seq 1 10); do
 done
 
 if [ $TCP_OK -eq 0 ]; then
-    echo "✗ Cannot reach ${DB_HOST}:${DB_PORT:-5432} — network/DNS issue"
+    echo "✗ Cannot reach ${DB_HOST}:${DB_PORT} — network/DNS issue"
     exit 1
 fi
 echo "✓ TCP connection OK"
 
-# Check pdo_pgsql extension
-php -r "extension_loaded('pdo_pgsql') ? print('pdo_pgsql: OK'.PHP_EOL) : print('pdo_pgsql: MISSING'.PHP_EOL);"
+# Build DSN based on DB_CONNECTION
+if [ "${DB_CONNECTION}" = "pgsql" ]; then
+    DB_DSN="pgsql:host=${DB_HOST};port=${DB_PORT};dbname=${DB_DATABASE}"
+else
+    DB_DSN="mysql:host=${DB_HOST};port=${DB_PORT};dbname=${DB_DATABASE}"
+fi
 
-DB_DSN="pgsql:host=${DB_HOST};port=${DB_PORT:-5432};dbname=${DB_DATABASE}"
 until php -r "
 try {
     \$pdo = new PDO('${DB_DSN}', '${DB_USERNAME}', '${DB_PASSWORD}');
