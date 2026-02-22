@@ -11,6 +11,7 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     freetype-dev \
     libzip-dev \
+    libpq-dev \
     zip \
     unzip \
     icu-dev \
@@ -20,6 +21,8 @@ RUN apk add --no-cache \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
+        pdo_pgsql \
+        pgsql \
         gd \
         zip \
         bcmath \
@@ -71,6 +74,7 @@ RUN apk add --no-cache \
     libjpeg-turbo \
     freetype \
     libzip \
+    libpq \
     icu-libs \
     dcron \
     busybox-suid \
@@ -81,12 +85,15 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     freetype-dev \
     libzip-dev \
+    libpq-dev \
     icu-dev \
     zlib-dev \
     # Configure and install PHP extensions
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
+        pdo_pgsql \
+        pgsql \
         gd \
         zip \
         bcmath \
