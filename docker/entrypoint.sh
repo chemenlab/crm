@@ -287,39 +287,15 @@ else
     echo "  ✓ bootstrap/cache/packages.php exists"
 fi
 
-# --- Diagnostics ---
-echo "  [DEBUG] PHP version:"
-php -v 2>&1 | head -1
-echo "  [DEBUG] PHP extensions check:"
-php -m 2>&1 | grep -iE "pdo|mysql|redis|json|mbstring|openssl|tokenizer|xml|ctype|bcmath" | tr '\n' ', '
-echo ""
-echo "  [DEBUG] .env driver values after sed:"
-grep -E '^(CACHE_STORE|SESSION_DRIVER|QUEUE_CONNECTION|DB_)' /var/www/.env
-echo "  [DEBUG] Checking artisan can boot..."
-php artisan --version 2>&1
-ARTISAN_EXIT=$?
-echo "  [DEBUG] artisan --version exit code: $ARTISAN_EXIT"
-
-if [ $ARTISAN_EXIT -ne 0 ]; then
-    echo "  ✗ artisan failed to boot! Trying with error display..."
-    php -d display_errors=1 -d error_reporting=E_ALL artisan --version 2>&1
-    echo "  [DEBUG] Trying config:clear with full error output..."
-    php -d display_errors=1 -d error_reporting=E_ALL artisan config:clear 2>&1
-fi
-# --- End Diagnostics ---
-
 # Clear any cached config to ensure fresh .env values are used
-echo "  [DEBUG] Running config:clear..."
-php artisan config:clear 2>&1 || echo "  ⚠ config:clear failed (see above)"
+php artisan config:clear 2>/dev/null || true
 
 # Run migration with env overrides as extra safety
-echo "  Starting migration..."
+echo "  Running migration..."
 CACHE_STORE=array SESSION_DRIVER=array QUEUE_CONNECTION=sync \
-    php -d display_errors=1 -d error_reporting=E_ALL \
-    artisan migrate --force --no-interaction -v > /tmp/migrate_output.log 2>&1
+    php artisan migrate --force --no-interaction -v > /tmp/migrate_output.log 2>&1
 MIGRATE_EXIT=$?
 cat /tmp/migrate_output.log
-
 echo "  Migration exit code: $MIGRATE_EXIT"
 
 # Restore original driver values after migration
