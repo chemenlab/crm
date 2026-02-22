@@ -182,7 +182,7 @@ fi
 # =============================================================================
 echo "[4/7] Running database migrations..."
 
-php artisan migrate --force --no-interaction
+php artisan migrate --force --no-interaction -v 2>&1
 MIGRATE_EXIT=$?
 
 if [ $MIGRATE_EXIT -eq 0 ]; then
