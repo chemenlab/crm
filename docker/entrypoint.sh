@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 echo "=== MasterClient Booking System - Container Initialization ==="
 
@@ -179,13 +178,13 @@ fi
 # =============================================================================
 echo "[4/7] Running database migrations..."
 
-# --isolated prevents concurrent migration runs across multiple replicas
-php artisan migrate --force --no-interaction --isolated
+php artisan migrate --force --no-interaction
+MIGRATE_EXIT=$?
 
-if [ $? -eq 0 ]; then
+if [ $MIGRATE_EXIT -eq 0 ]; then
     echo "✓ Migrations completed"
 else
-    echo "✗ Migration failed"
+    echo "✗ Migration failed with exit code $MIGRATE_EXIT"
     exit 1
 fi
 
@@ -203,10 +202,10 @@ else
 fi
 
 # Clear and cache configurations for production
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-echo "✓ Laravel caches generated"
+php artisan config:cache && echo "✓ config cached" || echo "⚠ config:cache failed (non-fatal)"
+php artisan route:cache && echo "✓ routes cached" || echo "⚠ route:cache failed (non-fatal)"
+php artisan view:cache && echo "✓ views cached" || echo "⚠ view:cache failed (non-fatal)"
+echo "✓ Laravel caches step done"
 
 # =============================================================================
 # 6. Setup Laravel Scheduler (cron)
