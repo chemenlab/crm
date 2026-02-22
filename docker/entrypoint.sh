@@ -159,36 +159,96 @@ echo "✓ Database connection established"
 # =============================================================================
 echo "[3/7] Waiting for Redis connection..."
 
+# Save original driver values from .env before any modifications
+ORIG_CACHE_STORE=$(grep '^CACHE_STORE=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+ORIG_SESSION_DRIVER=$(grep '^SESSION_DRIVER=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+ORIG_QUEUE_CONNECTION=$(grep '^QUEUE_CONNECTION=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+
+echo "  Original drivers: CACHE=$ORIG_CACHE_STORE SESSION=$ORIG_SESSION_DRIVER QUEUE=$ORIG_QUEUE_CONNECTION"
+
 REDIS_RETRIES=10
 REDIS_COUNT=0
+REDIS_OK=0
 
-until php artisan tinker --execute="Redis::ping();" >/dev/null 2>&1 || [ $REDIS_COUNT -eq $REDIS_RETRIES ]; do
+# Check Redis connectivity using raw PHP (avoids Laravel boot which may crash on missing DB tables)
+until [ $REDIS_COUNT -eq $REDIS_RETRIES ]; do
     REDIS_COUNT=$((REDIS_COUNT + 1))
     echo "Waiting for Redis... Attempt $REDIS_COUNT/$REDIS_RETRIES"
+
+    REDIS_HOST_VAL=$(grep '^REDIS_HOST=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+    REDIS_PORT_VAL=$(grep '^REDIS_PORT=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+    REDIS_PASSWORD_VAL=$(grep '^REDIS_PASSWORD=' /var/www/.env | cut -d'=' -f2 | tr -d '"')
+
+    if php -r "
+        \$r = new Redis();
+        try {
+            \$r->connect('${REDIS_HOST_VAL:-127.0.0.1}', (int)'${REDIS_PORT_VAL:-6379}', 3);
+            \$pass = '${REDIS_PASSWORD_VAL:-null}';
+            if (\$pass && \$pass !== 'null') \$r->auth(\$pass);
+            \$r->ping();
+            echo 'ok';
+            exit(0);
+        } catch (Exception \$e) {
+            exit(1);
+        }
+    " 2>/dev/null; then
+        REDIS_OK=1
+        break
+    fi
     sleep 2
 done
 
-if [ $REDIS_COUNT -eq $REDIS_RETRIES ]; then
+if [ $REDIS_OK -eq 0 ]; then
     echo "⚠ Redis connection failed - falling back to file-based cache/sessions"
-    sed -i 's/CACHE_STORE=redis/CACHE_STORE=file/' /var/www/.env
-    sed -i 's/SESSION_DRIVER=redis/SESSION_DRIVER=file/' /var/www/.env
-    sed -i 's/QUEUE_CONNECTION=redis/QUEUE_CONNECTION=database/' /var/www/.env
+    # Replace ANY cache/session/queue driver with safe fallbacks
+    sed -i 's/^CACHE_STORE=.*/CACHE_STORE=file/' /var/www/.env
+    sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' /var/www/.env
+    sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=database/' /var/www/.env
+    # Update saved values so we restore the correct fallback after migration
+    ORIG_CACHE_STORE="file"
+    ORIG_SESSION_DRIVER="file"
+    ORIG_QUEUE_CONNECTION="database"
 else
     echo "✓ Redis connection established"
 fi
 
 # =============================================================================
-# 4. Run migrations
+# 4. Run migrations (with safe drivers to avoid chicken-and-egg)
 # =============================================================================
 echo "[4/7] Running database migrations..."
 
-php artisan migrate --force --no-interaction -v 2>&1
+# CRITICAL FIX: Force array driver during migration to prevent chicken-and-egg problem.
+# When CACHE_STORE=database or SESSION_DRIVER=database, Laravel tries to access
+# the 'cache' and 'sessions' tables during boot — but they don't exist yet on
+# a fresh database. This causes an immediate crash (exit code 255).
+# Using 'array' driver keeps everything in-memory during migration.
+echo "  Temporarily setting CACHE_STORE=array, SESSION_DRIVER=array for migration..."
+sed -i 's/^CACHE_STORE=.*/CACHE_STORE=array/' /var/www/.env
+sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=array/' /var/www/.env
+
+# Also clear any cached config to ensure fresh .env values are used
+php artisan config:clear 2>/dev/null || true
+
+# Run migration with env overrides as extra safety (belt-and-suspenders)
+CACHE_STORE=array SESSION_DRIVER=array QUEUE_CONNECTION=sync \
+    php artisan migrate --force --no-interaction -v 2>&1
 MIGRATE_EXIT=$?
+
+# Restore original driver values after migration
+echo "  Restoring drivers: CACHE=$ORIG_CACHE_STORE SESSION=$ORIG_SESSION_DRIVER QUEUE=$ORIG_QUEUE_CONNECTION"
+sed -i "s/^CACHE_STORE=.*/CACHE_STORE=${ORIG_CACHE_STORE}/" /var/www/.env
+sed -i "s/^SESSION_DRIVER=.*/SESSION_DRIVER=${ORIG_SESSION_DRIVER}/" /var/www/.env
+
+# Clear config cache again so Laravel picks up the restored values
+php artisan config:clear 2>/dev/null || true
 
 if [ $MIGRATE_EXIT -eq 0 ]; then
     echo "✓ Migrations completed"
 else
     echo "✗ Migration failed with exit code $MIGRATE_EXIT"
+    # Show Laravel log for debugging
+    echo "--- Last 30 lines of Laravel log ---"
+    tail -n 30 /var/www/storage/logs/laravel.log 2>/dev/null || echo "(no log file)"
     exit 1
 fi
 
