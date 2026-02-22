@@ -24,16 +24,20 @@ class PaymentService
         $secretKey = config('services.yookassa.secret_key');
 
         // Graceful degradation: don't throw if not configured
-        if (!$shopId || !$secretKey || $shopId === 'your_shop_id_here' || $secretKey === 'your_secret_key_here') {
+        // YooKassa SDK expects shop_id to be numeric (int), so reject any non-numeric values
+        if (
+            empty($shopId) || empty($secretKey) || !is_numeric($shopId)
+            || str_contains((string) $shopId, 'your') || str_contains((string) $secretKey, 'your')
+        ) {
             Log::warning('YooKassa credentials are not configured. Payment features will be disabled.');
             return;
         }
 
         try {
             $this->client = new Client();
-            $this->client->setAuth($shopId, $secretKey);
+            $this->client->setAuth((int) $shopId, $secretKey);
             $this->isConfigured = true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to initialize YooKassa client', ['error' => $e->getMessage()]);
         }
     }
