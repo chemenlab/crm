@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Services\OAuthService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Exception;
@@ -33,32 +34,33 @@ class OAuthController extends Controller
     /**
      * Handle OAuth callback.
      */
-    public function callback(string $provider): RedirectResponse
+    public function callback(Request $request, string $provider): RedirectResponse
     {
         $this->validateProvider($provider);
 
         try {
             $socialiteUser = Socialite::driver($provider)->user();
-            
+
             // Handle OAuth callback
             $user = $this->oauthService->handleCallback($provider, $socialiteUser);
-            
-            // Login user
+
+            // Login user and regenerate session (prevents session fixation)
             Auth::login($user, true);
-            
+            $request->session()->regenerate();
+
             // Get callback result for appropriate message
             $result = $this->oauthService->getLastCallbackResult();
             $providerName = $this->getProviderName($provider);
-            
+
             $message = match($result['type']) {
                 'register' => 'Добро пожаловать! Аккаунт создан через ' . $providerName,
                 'linked' => 'Аккаунт ' . $providerName . ' связан с вашим существующим аккаунтом',
                 default => 'Вы успешно вошли через ' . $providerName,
             };
-            
+
             // Redirect to dashboard
             return redirect()->route('dashboard')->with('success', $message);
-                
+
         } catch (Exception $e) {
             \Log::error('OAuth callback error', [
                 'provider' => $provider,
