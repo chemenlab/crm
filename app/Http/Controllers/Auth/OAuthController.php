@@ -38,15 +38,20 @@ class OAuthController extends Controller
     {
         $this->validateProvider($provider);
 
+        \Log::info('[OAuth] callback started', ['provider' => $provider]);
+
         try {
             $socialiteUser = Socialite::driver($provider)->user();
+            \Log::info('[OAuth] socialite user retrieved', ['email' => $socialiteUser->getEmail()]);
 
             // Handle OAuth callback
             $user = $this->oauthService->handleCallback($provider, $socialiteUser);
+            \Log::info('[OAuth] user resolved', ['user_id' => $user->id]);
 
             // Login user and regenerate session (prevents session fixation)
             Auth::login($user, true);
             $request->session()->regenerate();
+            \Log::info('[OAuth] auth login done', ['auth_check' => Auth::check(), 'session_id' => session()->getId()]);
 
             // Get callback result for appropriate message
             $result = $this->oauthService->getLastCallbackResult();
@@ -62,9 +67,10 @@ class OAuthController extends Controller
             return redirect()->route('dashboard')->with('success', $message);
 
         } catch (Exception $e) {
-            \Log::error('OAuth callback error', [
+            \Log::error('[OAuth] callback error', [
                 'provider' => $provider,
                 'error' => $e->getMessage(),
+                'class' => get_class($e),
             ]);
 
             return redirect()->route('login')
