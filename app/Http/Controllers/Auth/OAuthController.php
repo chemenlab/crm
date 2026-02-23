@@ -38,10 +38,12 @@ class OAuthController extends Controller
     {
         $this->validateProvider($provider);
 
+        file_put_contents(storage_path('logs/oauth_debug.log'), date('Y-m-d H:i:s') . " [START] provider={$provider}\n", FILE_APPEND);
         \Log::info('[OAuth] callback started', ['provider' => $provider]);
 
         try {
             $socialiteUser = Socialite::driver($provider)->user();
+            file_put_contents(storage_path('logs/oauth_debug.log'), date('Y-m-d H:i:s') . " [SOCIALITE OK] email=" . $socialiteUser->getEmail() . "\n", FILE_APPEND);
             \Log::info('[OAuth] socialite user retrieved', ['email' => $socialiteUser->getEmail()]);
 
             // Handle OAuth callback
@@ -67,6 +69,7 @@ class OAuthController extends Controller
             return redirect()->route('dashboard')->with('success', $message);
 
         } catch (Exception $e) {
+            file_put_contents(storage_path('logs/oauth_debug.log'), date('Y-m-d H:i:s') . " [EXCEPTION] " . get_class($e) . ": " . $e->getMessage() . "\n", FILE_APPEND);
             \Log::error('[OAuth] callback error', [
                 'provider' => $provider,
                 'error' => $e->getMessage(),
