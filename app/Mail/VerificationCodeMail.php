@@ -26,7 +26,7 @@ class VerificationCodeMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Код подтверждения email - MasterPlan',
+            subject: 'Код подтверждения email — mClient',
         );
     }
 

@@ -45,7 +45,7 @@ class TelegramBotService
     }
 
     /**
-     * Link Telegram account to MasterPlan account
+     * Link Telegram account to mClient account
      */
     public function linkAccount(string $code, int $telegramId, string $chatId, array $userData = []): bool
     {
@@ -237,7 +237,7 @@ class TelegramBotService
      */
     protected function handleStart(): string
     {
-        return "👋 Добро пожаловать в MasterPlan бот!\n\n" .
+        return "👋 Добро пожаловать в mClient бот!\n\n" .
                "Для привязки аккаунта:\n" .
                "1. Зайдите в настройки на сайте\n" .
                "2. Сгенерируйте код привязки\n" .

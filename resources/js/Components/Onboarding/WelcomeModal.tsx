@@ -37,7 +37,7 @@ export default function WelcomeModal({
             </div>
           </div>
           <DialogDescription className="text-base pt-4">
-            Рады видеть вас в <strong>MasterPlan</strong> — системе для управления записями и клиентами.
+            Рады видеть вас в <strong>mClient</strong> — системе для управления записями и клиентами.
           </DialogDescription>
         </DialogHeader>
 

@@ -66,7 +66,7 @@ export default function Index({ categories, featuredArticles, popularArticles }:
                 База знаний
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Найдите ответы на ваши вопросы и изучите возможности MasterPlan
+                Найдите ответы на ваши вопросы и изучите возможности mClient
               </p>
             </div>
 

@@ -2,7 +2,7 @@
  * Reviews Module - Entry Point
  * 
  * This module provides review collection and display functionality
- * for the MasterPlan platform.
+ * for the mClient platform.
  */
 
 // Export components

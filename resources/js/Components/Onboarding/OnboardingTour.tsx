@@ -13,7 +13,7 @@ const tourSteps: DriveStep[] = [
   {
     element: '#dashboard-link',
     popover: {
-      title: 'Добро пожаловать в MasterPlan! 👋',
+      title: 'Добро пожаловать в mClient! 👋',
       description: 'Давайте познакомимся с основными возможностями системы. Это займет всего пару минут.',
       side: 'right',
       align: 'start',

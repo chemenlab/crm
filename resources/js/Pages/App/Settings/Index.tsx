@@ -418,7 +418,7 @@ export default function SettingsIndex({ auth, user, schedule, notifications, oau
                                                         <div className="grid gap-2">
                                                             <Label htmlFor="slug">Ссылка на страницу (slug)</Label>
                                                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                                                <span className="text-muted-foreground text-sm whitespace-nowrap">masterplan.com/m/</span>
+                                                                <span className="text-muted-foreground text-sm whitespace-nowrap">mclient.pro/m/</span>
                                                                 <Input id="slug" name="slug" defaultValue={user?.slug} placeholder="your-name" className="flex-1" />
                                                             </div>
                                                         </div>
