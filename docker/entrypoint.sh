@@ -377,6 +377,13 @@ chmod -R 775 /var/www/storage
 chown -R www:www /var/www/bootstrap/cache
 chmod -R 775 /var/www/bootstrap/cache
 
+# Nginx temp dirs (must be writable by www user)
+mkdir -p \
+    /var/www/storage/nginx-tmp/client_body \
+    /var/www/storage/nginx-tmp/proxy \
+    /var/www/storage/nginx-tmp/fastcgi
+chown -R www:www /var/www/storage/nginx-tmp
+
 echo "✓ Permissions set"
 
 echo "=== Container initialization completed successfully ==="
