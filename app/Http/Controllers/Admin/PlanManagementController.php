@@ -119,6 +119,7 @@ class PlanManagementController extends Controller
 
         // Преобразуем старый формат в JSON структуру
         $features = [
+            'trial_days' => (int)($validated['trial_days'] ?? 0),
             'limits' => [
                 'appointments' => (int)$validated['max_appointments'],
                 'clients' => (int)$validated['max_clients'],
@@ -176,7 +177,7 @@ class PlanManagementController extends Controller
         $planData['has_analytics'] = $plan->hasFeature('analytics');
         $planData['has_priority_support'] = $plan->hasFeature('priority_support');
         $planData['has_custom_branding'] = $plan->hasFeature('custom_branding');
-        $planData['trial_days'] = 0; // Триал теперь не хранится в плане
+        $planData['trial_days'] = $plan->features['trial_days'] ?? 0;
         
         return Inertia::render('Admin/Plans/Edit', [
             'plan' => $planData,
@@ -221,6 +222,7 @@ class PlanManagementController extends Controller
 
         // Преобразуем старый формат в JSON структуру
         $features = [
+            'trial_days' => (int)($validated['trial_days'] ?? 0),
             'limits' => [
                 'appointments' => (int)$validated['max_appointments'],
                 'clients' => (int)$validated['max_clients'],

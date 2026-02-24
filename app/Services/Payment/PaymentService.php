@@ -84,7 +84,7 @@ class PaymentService
                 ],
                 'confirmation' => [
                     'type' => 'redirect',
-                    'return_url' => config('services.yookassa.return_url'),
+                    'return_url' => config('services.yookassa.return_url') ?: route('subscriptions.success'),
                 ],
                 'capture' => true,
                 'description' => $description,

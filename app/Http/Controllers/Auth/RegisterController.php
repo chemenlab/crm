@@ -10,6 +10,7 @@ use App\Services\Subscription\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -63,7 +64,14 @@ class RegisterController extends Controller
         Auth::login($user);
 
         // Активируем триальную подписку "Максимальная" на 14 дней
-        $this->subscriptionService->activateTrial($user);
+        try {
+            $this->subscriptionService->activateTrial($user);
+        } catch (\RuntimeException $e) {
+            Log::warning('Trial activation failed during registration', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Generate and send verification code
         $verificationCode = $this->verificationService->generateCode($user, $user->email);
