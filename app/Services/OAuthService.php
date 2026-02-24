@@ -57,6 +57,10 @@ class OAuthService
         $user = User::where('email', $socialiteUser->getEmail())->first();
 
         if ($user) {
+            // Auto-verify email for OAuth users (they proved ownership via provider)
+            if (!$user->hasVerifiedEmail()) {
+                $user->markEmailAsVerified();
+            }
             // Link OAuth account to existing user
             $this->linkAccount($user, $provider, $socialiteUser);
             $this->lastCallbackResult = ['type' => 'linked', 'provider' => $provider];
