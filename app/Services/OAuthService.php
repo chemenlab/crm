@@ -82,13 +82,17 @@ class OAuthService
      */
     protected function createUser(SocialiteUser $socialiteUser): User
     {
-        return User::create([
+        $user = User::create([
             'name' => $socialiteUser->getName() ?? $socialiteUser->getNickname() ?? 'User',
             'email' => $socialiteUser->getEmail(),
-            'email_verified_at' => now(), // Auto-verify OAuth users
             'password' => null, // OAuth users don't have password initially
             'onboarding_completed' => false,
         ]);
+
+        // Auto-verify OAuth users (forceFill bypasses $fillable restrictions)
+        $user->markEmailAsVerified();
+
+        return $user;
     }
 
     /**
